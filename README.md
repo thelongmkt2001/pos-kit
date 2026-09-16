@@ -130,6 +130,26 @@ cho xuôi. Một câu hỏi thì hoặc được trả lời, hoặc bỏ trốn
 
 ---
 
+## Khi một cổng kêu đúng chỗ bạn CỐ Ý làm sai
+
+Có những dự án mang một chỗ sai có chủ đích — một fixture dạy học, một ví dụ cố tình hỏng. Cổng sẽ
+kêu, và kêu đúng.
+
+Tạo `kit/bo-qua.txt` trong dự án của bạn, mỗi dòng một đường dẫn (hoặc tiền tố):
+
+```
+# Ghi LY DO ngay phia tren moi dong. Khong ly do thi nguoi sau khong biet
+# co nen xoa khong.
+
+# Vi du: thu muc nay mang loi CO Y de day hoc; sua no di la xoa mat bai giang.
+vi-du/du-an-hong
+```
+
+⚠️ Danh sách này **được in ra mỗi lần chạy cổng**, cố ý. Một chỗ được miễn trừ mà không ai nhìn
+thấy chính là kiểu hỏng mà cả bộ cổng này sinh ra để chặn.
+
+---
+
 ## Việc đầu tiên sau khi khởi tạo
 
 **Không phải viết code.** Là điền `PROJECT.md`, nhất là mục **"KHÔNG phải mục tiêu"**.
