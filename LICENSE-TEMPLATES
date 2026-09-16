@@ -1,0 +1,39 @@
+CC0 1.0 Universal — dành cho NỘI DUNG MẪU
+==========================================
+
+File này áp cho **nội dung mẫu mà `khoi-tao.py` viết vào dự án của bạn**:
+PROJECT.md, STATE.md, CLAUDE.md, QUYET-DINH/, viec/MAU-VIEC.md, README.md,
+GIA-DINH.md, SO-SEO.md, RUI-RO.md, CHO-DUA.md, BAN-DO.md, phu-thuoc-ngoai.txt.
+
+Hai file mã nguồn — `khoi-tao.py` và `cong.py` — KHÔNG thuộc file này. Chúng
+theo giấy phép MIT, xem `LICENSE`.
+
+VÌ SAO TÁCH LÀM HAI
+-------------------
+Mọi giấy phép phần mềm, kể cả MIT, đều đòi giữ lại một dòng ghi công. Nội dung
+mẫu thì nằm bên trong PROJECT.md và STATE.md CỦA BẠN — bắt bạn mang một dòng
+ghi công trong đó là một luật không ai tuân, và một luật không ai tuân thì tệ
+hơn không có.
+
+CC0 là lựa chọn duy nhất không đòi ghi công. Nên: giữ bộ công cụ có tên tác
+giả; những gì nó viết vào dự án bạn thì là của bạn.
+
+Nói ngắn gọn, bạn được toàn quyền dùng nội dung mẫu cho bất kỳ mục đích gì,
+kể cả thương mại, không cần xin phép, không cần ghi nguồn.
+
+Toàn văn CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+
+CC0 1.0 Universal — for the TEMPLATE CONTENT
+=============================================
+
+This file applies to the template content that `khoi-tao.py` writes into your
+project (the files listed above). It does NOT apply to `khoi-tao.py` and
+`cong.py`, which are MIT — see `LICENSE`.
+
+To the extent possible under law, the author has waived all copyright and
+related or neighboring rights to that template content. You may copy, modify,
+distribute and use it, including for commercial purposes, all without asking
+permission and without attribution.
+
+Full text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
