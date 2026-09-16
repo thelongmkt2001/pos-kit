@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.7.0"
+PHIEN_BAN = "1.8.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -479,6 +479,11 @@ def cong_phu_thuoc(goc):
         phan = re.split(r"\s{2,}|\t", d, 1)
         url = phan[0].strip()
         vai = phan[1].strip() if len(phan) > 1 else ""
+        # Dong ten mien do cong_ten_mien lo. Khong bo qua o day thi cong
+        # nay goi "ten-mien thelong.tech" nhu mot dia chi web va do — do
+        # vi mot ly do khong lien quan gi toi thu no khai.
+        if url.lower().startswith(TIEN_TO_TEN_MIEN.strip()):
+            continue
         try:
             yc = urllib.request.Request(url, method="HEAD",
                                         headers={"User-Agent": "kit-cong"})
@@ -1714,6 +1719,136 @@ def _pha_ngan_sach(goc):
 cong_ngan_sach.pha = _pha_ngan_sach
 
 
+# Con bao nhieu ngay thi keu. Vi sao 60: du de gia han khong voi, va du muon
+# de khong keu suot nua nam. Mot cong keu 200 ngay lien thi bi tat di.
+NGUONG_NGAY_TEN_MIEN = 60
+
+# Dong khai bao ten mien trong phu-thuoc-ngoai.txt. Dung tien to rieng de cong
+# URL cu KHONG co goi no nhu mot dia chi web.
+TIEN_TO_TEN_MIEN = "ten-mien "
+
+
+def _han_ten_mien(ten):
+    """Tra ve (ngay het han dang YYYY-MM-DD, trang thai) hoac (None, ly do).
+
+    Di qua bang chi duong cua IANA roi toi may chu cua chinh khu vuc do. Khong
+    dung mot dich vu trung gian: mot cai tra ve HTML khi loi, va luc do script
+    doc duoc "khong sao ca" tu mot thu khong phai du lieu.
+    """
+    import json as _json
+    import urllib.request
+    kv = ten.rsplit(".", 1)[-1].lower()
+    try:
+        bt = urllib.request.urlopen(
+            urllib.request.Request("https://data.iana.org/rdap/dns.json",
+                                   headers={"User-Agent": "kit-cong"}),
+            timeout=20).read().decode("utf-8", "replace")
+        dich = None
+        for svc in _json.loads(bt).get("services", []):
+            if kv in [x.lower() for x in svc[0]]:
+                dich = svc[1][0]
+                break
+        if not dich:
+            return None, "IANA khong co may chu RDAP cho duoi .%s" % kv
+        u = dich.rstrip("/") + "/domain/" + ten
+        t = urllib.request.urlopen(
+            urllib.request.Request(u, headers={"User-Agent": "kit-cong"}),
+            timeout=20).read().decode("utf-8", "replace")
+        d = _json.loads(t)
+    except Exception as e:
+        return None, type(e).__name__
+
+    for ev in d.get("events", []):
+        if ev.get("eventAction") == "expiration":
+            return (ev.get("eventDate", "")[:10],
+                    ",".join(d.get("status", []) or ["?"]))
+    return None, "RDAP khong tra ve ngay het han"
+
+
+def cong_ten_mien(goc):
+    """Ten mien da khai bao con bao lau nua het han. Can mang.
+
+    Het han thi may chu van chay, moi cong trong nha van xanh, va dia chi
+    nguoi ta go vao thi khong vao duoc. Do la kieu hong im lang nhat trong
+    danh sach: khong co gi bao loi ca, chi la khong ai vao duoc nua.
+    """
+    ra = []
+    f = tim_tep(goc, TEP_PHU_THUOC, "docs/" + TEP_PHU_THUOC)
+    ten_mien = []
+    if f:
+        for d in doc(f).splitlines():
+            d = d.strip()
+            if d.lower().startswith(TIEN_TO_TEN_MIEN):
+                phan = re.split(r"\s{2,}|\t", d[len(TIEN_TO_TEN_MIEN):].strip(), 1)
+                ten_mien.append((phan[0].strip(),
+                                 phan[1].strip() if len(phan) > 1 else ""))
+    if not ten_mien:
+        ra.append(("--", "Khong khai bao ten mien nao — bo qua cong nay"))
+        ra.append(("  ", "Khai bao trong %s, moi dong:" % TEP_PHU_THUOC))
+        ra.append(("  ", "  ten-mien vi-du.com<hai dau cach>vai tro cua no"))
+        return 0, ra
+
+    hom_nay = time.strftime("%Y-%m-%d")
+    hong = 0
+    for ten, vai in ten_mien:
+        han, tt = _han_ten_mien(ten)
+        if not han:
+            ra.append(("HONG", "%-30s khong tra duoc han: %s" % (ten, tt)))
+            ra.append(("   ", "Khong tra duoc KHONG PHAI la 'con han'. Do la"))
+            ra.append(("   ", "khong biet — va khong biet thi khong yen tam duoc."))
+            hong += 1
+            continue
+        con = _so_ngay(hom_nay, han)
+        d = "%-30s het han %s (con %d ngay)  %s" % (ten, han, con, vai[:24])
+        if con <= NGUONG_NGAY_TEN_MIEN:
+            ra.append(("HONG", d))
+            ra.append(("   ", "Het han thi may chu van chay va moi cong van xanh."))
+            ra.append(("   ", "Khong co gi bao loi ca — chi la khong ai vao duoc."))
+            hong += 1
+        else:
+            ra.append(("ok", d))
+            if "active" not in tt and "ok" not in tt.lower():
+                ra.append(("   ", "Trang thai dang ky: %s" % tt))
+    return (1 if hong else 0), ra
+
+
+def _so_ngay(a, b):
+    """So ngay tu a den b, ca hai dang YYYY-MM-DD. Khong dung thu vien ngoai."""
+    import calendar
+
+    def stt(x):
+        y, m, d = [int(z) for z in x.split("-")]
+        n = d
+        for yy in range(1970, y):
+            n += 366 if calendar.isleap(yy) else 365
+        for mm in range(1, m):
+            n += calendar.monthrange(y, mm)[1]
+        return n
+    return stt(b) - stt(a)
+
+
+cong_ten_mien.mo_ta = "Ten mien con han"
+cong_ten_mien.can_mang = True
+cong_ten_mien.chung_minh = "ten mien DA KHAI BAO con han qua %d ngay, theo so dang ky" % NGUONG_NGAY_TEN_MIEN
+cong_ten_mien.khong_chung_minh = "ban da khai bao DU ten mien, hay the thanh toan gia han con song. No doc so dang ky, khong doc vi cua ban."
+
+
+def _pha_ten_mien(goc):
+    """Gieo mot ten mien khong co that trong danh sach da khai."""
+    for ten in (TEP_PHU_THUOC, os.path.join("docs", TEP_PHU_THUOC)):
+        duong = os.path.join(goc, ten)
+        if os.path.exists(duong):
+            io.open(duong, "a", encoding="utf-8", newline="").write(
+                NL + "ten-mien khong-he-ton-tai-9k2x.tech  gieo de thu phep kiem" + NL)
+            return
+    io.open(os.path.join(goc, TEP_PHU_THUOC), "w", encoding="utf-8",
+            newline="").write(
+        "ten-mien khong-he-ton-tai-9k2x.tech  gieo de thu phep kiem" + NL)
+
+
+cong_ten_mien.pha = _pha_ten_mien
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -1732,6 +1867,7 @@ CAC_CONG = [
     cong_giai_doan,
     cong_ngan_sach,
     cong_phu_thuoc,
+    cong_ten_mien,
 ]
 
 

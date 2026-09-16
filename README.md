@@ -100,6 +100,7 @@ phép thử viết sai**, không phải cổng hỏng. Cách giải thích dễ 
 | **Sổ "đã tra" ngăn được lần tra lại** | Một mục **đã chọn** mà không ghi đã loại gì; chọn thứ bên ngoài mà không ghi giấy phép; giấy phép *không rõ* mà không có hạn xem lại, hoặc hạn đã qua | Bạn đã tra **đủ**, hay tra **đúng**, hay giấy phép ghi trong đó là thật |
 | **Quy ước tới được cả hai loại công cụ** | Chỉ có một trong hai tên `AGENTS.md` / `CLAUDE.md`; hoặc **cả hai đều mang nội dung** — hai nguồn sự thật | Công cụ **có đọc** file đó thật không, hay có làm theo không |
 | **Nhật ký còn được ghi** | Nhật ký trỏ tới hồ sơ đã mất; hoặc kho chạy tiếp **10 commit** mà không ai ghi thêm dòng nào | Mục nhật ký đó đúng, hay có ích |
+| **Tên miền còn hạn** *(`--ngoai`)* | Tên miền đã khai báo còn **≤ 60 ngày** là hết hạn; hoặc **không tra được hạn** | Thẻ thanh toán gia hạn còn sống. Nó đọc sổ đăng ký, không đọc ví bạn |
 | **Phụ thuộc ngoài còn sống** *(`--ngoai`)* | URL đã khai báo mà chết | Nội dung sau URL còn đúng |
 
 Cổng cuối cần mạng nên **tuỳ chọn** — để `python kit/cong.py` chạy được cả lúc không có Internet.
@@ -185,6 +186,33 @@ sát**, nên phải chặn bằng file chứ không bằng niềm tin.
 
 `AGENTS.md` mang nội dung. `CLAUDE.md` chỉ một dòng trỏ tới nó. Chép sang cả hai thì sửa bản này,
 bản kia cũ đi mà không ai biết bản nào cũ — và cổng báo đỏ đúng chuyện đó.
+
+---
+
+## Một kiểu hỏng không cổng nào trong nhà nhìn thấy
+
+Tên miền hết hạn. Máy chủ vẫn chạy, mọi cổng vẫn xanh, và người ta gõ địa chỉ thì **không vào được**.
+Không có gì báo lỗi cả — chỉ là không ai vào được nữa.
+
+Khai báo nó trong `phu-thuoc-ngoai.txt`:
+
+```
+ten-mien vi-du.com  dia chi nguoi ta go vao de toi du an nay
+```
+
+> ### Đừng hỏi trang web. Hỏi **sổ đăng ký**.
+
+Cách hiển nhiên — gọi thử địa chỉ đó xem còn sống không — **đã thử và không chạy**: rất nhiều địa
+chỉ trả `HTTP 403` với script, và lúc đó không phân biệt được *"trang chết"* với *"trang sống nhưng
+chặn tôi"*. Hạn tên miền thì không nằm ở trang web; nó nằm ở sổ đăng ký, và RDAP trả nó về dưới dạng
+**dữ liệu**, không phải một trang có thể bị chặn.
+
+Cổng đi qua bảng chỉ đường của **IANA** để tìm máy chủ RDAP của đuôi tên miền, rồi hỏi thẳng máy chủ
+đó — không qua dịch vụ trung gian nào.
+
+📌 **"Không tra được hạn" tính là hỏng**, không phải *"chắc là còn hạn"*. Không biết thì không yên
+tâm được. Ngưỡng 60 ngày: đủ để gia hạn không vội, đủ muộn để không kêu suốt nửa năm — một cổng kêu
+200 ngày liền thì bị tắt đi, và lúc bị tắt nó không bảo vệ gì nữa.
 
 ---
 

@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.7.0"
+PHIEN_BAN = "1.8.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -787,8 +787,14 @@ PHU_THUOC = """# Phu thuoc ngoai — thu du an nay dua vao ma nam ngoai tam tay
 # trong nha van xanh het. Do dung la kieu hong im lang.
 #
 # Kiem:  python kit/cong.py --ngoai
+#
+# Dong bat dau bang "ten-mien " duoc mot cong KHAC lo: no doc SO DANG KY qua
+# RDAP chu khong goi trang web. Vi sao tach ra: nhieu dia chi tra HTTP 403 voi
+# script, va luc do khong phan biet duoc "trang chet" voi "trang song nhung
+# chan toi". Han ten mien thi khong hoi trang, hoi so dang ky.
 
 # https://github.com/<ai do>/<kho gi do>  kho ma du an nay clone tu day
+# ten-mien vi-du.com  dia chi nguoi ta go vao de toi du an nay
 """
 
 README_KIT = """# Bat dau

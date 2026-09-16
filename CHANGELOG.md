@@ -8,6 +8,46 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.8.0] — 2026-09-17
+
+Thêm **cổng thứ 17**. Bộ nền vẫn 16 file.
+
+### Thêm
+
+- **Cổng `Ten mien con han`** *(cần mạng, chạy với `--ngoai`)*. Khai báo trong
+  `phu-thuoc-ngoai.txt`:
+
+  ```
+  ten-mien vi-du.com  dia chi nguoi ta go vao de toi du an nay
+  ```
+
+  Tên miền hết hạn là kiểu hỏng **không cổng nào trong nhà nhìn thấy**: máy chủ vẫn chạy, mọi cổng
+  vẫn xanh, và người ta gõ địa chỉ thì không vào được. Không có gì báo lỗi cả.
+
+  > **Đừng hỏi trang web. Hỏi sổ đăng ký.**
+
+  Cách hiển nhiên — gọi thử địa chỉ xem còn sống không — **đã thử trên một dự án thật và không
+  chạy**: địa chỉ trả `HTTP 403` với mọi cách gọi, nên script không phân biệt được *"trang chết"*
+  với *"trang sống nhưng chặn tôi"*. Hạn tên miền nằm ở **sổ đăng ký**, và RDAP trả nó về dưới dạng
+  **dữ liệu**, không phải một trang có thể bị chặn.
+
+  Cổng đi qua bảng chỉ đường của **IANA** để tìm máy chủ RDAP của đuôi tên miền rồi hỏi thẳng —
+  không qua dịch vụ trung gian nào. Một dịch vụ đã thử trả về HTML khi lỗi, và lúc đó script đọc
+  được *"không sao cả"* từ một thứ không phải dữ liệu.
+
+  **Ngưỡng 60 ngày.** Đủ để gia hạn không vội, đủ muộn để không kêu suốt nửa năm — một cổng kêu 200
+  ngày liền thì bị tắt đi, và lúc bị tắt nó không bảo vệ gì nữa.
+
+  ⚠️ *"Không tra được hạn"* tính là **hỏng**, không phải *"chắc là còn hạn"*.
+
+  ⚠️ Nó đọc **sổ đăng ký**, không đọc phương thức thanh toán phía sau. Một tên miền còn hạn vẫn có
+  thể mất vì một cái thẻ hết hạn. Dòng *KHÔNG chứng minh* của cổng nói đúng điều đó.
+
+### Nâng từ 1.7.0
+
+Chép lại `cong.py` và `khoi-tao.py`. Không cần làm gì thêm: chưa khai báo `ten-mien` nào thì cổng
+**im lặng** và không có gì đỏ lên.
+
 ## [1.7.0] — 2026-09-17
 
 Bộ nền **15 → 16 file**. Số cổng không đổi (16).
