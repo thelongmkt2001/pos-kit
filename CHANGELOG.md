@@ -8,6 +8,68 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.6.0] — 2026-09-17
+
+Bản lớn. Bộ nền **8 → 15 file**, số cổng **10 → 16**.
+
+Các bản 1.1.0–1.5.0 là bước trung gian, **chưa bao giờ công bố** — sáu lô làm liền trong một ngày,
+gộp lại thành bản này để người dùng không phải đuổi theo một thứ đang chạy.
+
+### Nâng từ 1.0.x lên: ba bước, theo đúng thứ tự
+
+```bash
+cp pos-kit/cong.py kit/cong.py       # chép bộ cổng mới vào dự án của bạn
+mv CLAUDE.md AGENTS.md               # quy ước cũ của BẠN trở thành bản chính
+python pos-kit/khoi-tao.py .         # tạo phần còn thiếu, BỎ QUA file đã có
+```
+
+⚠️ **Bước hai bắt buộc, và phải đứng trước bước ba.** Bỏ nó thì `khoi-tao.py` tạo một `AGENTS.md`
+mới bên cạnh `CLAUDE.md` cũ của bạn, thành **hai bản đầy** — và cổng *Quy uoc toi duoc ca hai loai
+cong cu* báo đỏ, đúng như nó phải làm.
+
+Bản nháp của mục changelog này ban đầu hứa *"không có gì đỏ lên chỉ vì bạn nâng bản"*. Chạy thử
+trên một dự án dựng bằng bản cũ thì nó **đỏ ngay**. Lời hứa bị thay bằng ba dòng lệnh ở trên, và
+ba dòng đó đã chạy: 15 cổng xanh, thoát 0.
+
+Năm file còn lại — `DA-TRA.md`, `KET-NOI.md`, `GIAI-DOAN.md`, `NGAN-SACH.md`, `CLAUDE.md` (bản
+trỏ) — được tạo mới, và các cổng của chúng **im lặng** khi bạn chưa điền gì.
+
+### Thêm
+
+- **`NHAT-KY.md` + `boi-canh/`** — nhật ký làm việc, và chỗ để nguyên liệu thô. `QUYET-DINH/` giữ
+  cái *đã chốt*; nhật ký giữ cái *chưa chốt*: đã thử gì, hỏng ra sao, vì sao đổi hướng.
+  Cổng bắt **nhật ký nói dối** (trỏ tới hồ sơ đã mất) và **nhật ký dừng lại** (kho chạy tiếp 10
+  commit mà không ai ghi).
+- **`AGENTS.md` là bản chính, `CLAUDE.md` là một dòng trỏ tới nó.** Đo được: không công cụ nào đọc
+  cả hai tên. Thiếu tên nào thì với công cụ đó, quy ước của bạn là **một thứ vô hình** — và nó im
+  lặng y hệt lúc quy ước có mà không có tác dụng. Cổng bắt việc thiếu một tên, **và** việc chép nội
+  dung sang cả hai (hai nguồn sự thật).
+- **`DA-TRA.md`** — tra trước khi dựng. Cổng đòi dòng **`DA LOAI`**, không phải dòng `CHON`: một sổ
+  chỉ ghi cái đã chọn thì không ngăn được lần tra lại. Lấy code ngoài mà không ghi giấy phép cũng
+  đỏ; ghi *"không rõ"* thì được, nhưng phải có hạn xem lại.
+- **`KET-NOI.md`** — plugin, connector, MCP, khoá API. *Một chỗ nối không phải một tính năng, nó là
+  một **quyền**.* Cổng đòi `QUYEN` là một trong `doc` / `ghi` / `tieu tien`, và chỗ nào **ghi** được
+  thì phải có giới hạn lẫn **cách tắt**.
+- **`GIAI-DOAN.md`** — dãy giai đoạn. Trường nặng nhất là **`HOAN LAI`**: cái mỗi giai đoạn *cố ý*
+  để lại. Cổng đòi điều kiện thoát **đo được**, đúng một giai đoạn đang chạy, và tên đó **khớp với
+  `STATE.md`**.
+- **`NGAN-SACH.md`** — ngân sách cho tầng **luôn đọc**. Cái đắt nhất không phải file dài nhất, là
+  file được đọc lại mỗi phiên. Cổng in con số đo được **mỗi lần chạy**, kể cả khi xanh.
+
+### Sửa
+
+- Hai cổng từng **xanh vì lý do sai**, cả hai bắt được bằng cách gọi thẳng cổng ra đọc thông báo
+  trên từng nhánh — kể cả nhánh bắt buộc phải xanh:
+  - tra khoá trường bằng chữ hoa trong khi hàm bỏ dấu trả về chữ thường, nên **mọi mục đều bị bỏ
+    qua** và cổng báo *"không thấy gì sai"* trong khi ý nó là *"tôi không thấy gì cả"*;
+  - khớp trạng thái bằng **chuỗi con**, nên `"sắp xong"` được tính là `"xong"`. Nay mọi trường gọi
+    tên được đều khớp **bằng**, qua một hàm chung.
+
+### Đo
+
+Chép từ GitHub về, dựng một dự án mới: **21 file**, `python kit/cong.py` thoát 0 ngay ngày đầu —
+không cổng nào kêu nhầm — và `--tu-kiem` chứng minh **15/15** cổng trượt được (cổng thứ 16 cần mạng).
+
 ## [1.0.1] — 2026-09-17
 
 Chỉ sửa chữ, không đổi hành vi. Bạn đã chép `cong.py` về dự án rồi thì **không cần làm gì** —

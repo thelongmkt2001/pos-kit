@@ -94,6 +94,12 @@ phép thử viết sai**, không phải cổng hỏng. Cách giải thích dễ 
 | **Rủi ro đang mở có cò báo** | Rủi ro còn mở mà ô cò báo trống, hoặc chỉ là một **ý định** | Cò báo đó sẽ kêu |
 | **Chỗ dựa được ghi ra** | Có dấu vết phụ thuộc ngoài mà không danh sách nào ghi | Danh sách đó đủ, hay đúng |
 | **Bản đồ hệ thống còn đúng** | Bản đồ trỏ tới đường dẫn không còn tồn tại | Bản đồ đúng, đủ, hay **có tồn tại** |
+| **Tầng luôn đọc còn trong ngân sách** | Tổng số từ của những file được đọc **mỗi phiên** vượt con số đã khai | Con số ngân sách đó **đúng**; và nó chỉ đo những file bạn **kể ra** |
+| **Dãy giai đoạn còn chốt được** | Giai đoạn không gọi tên trạng thái, hoặc gọi bằng một chữ tự nghĩ ra (*"sắp xong"*); điều kiện thoát **không đo được**; không ghi cái cố ý hoãn lại; **hai** giai đoạn cùng đang làm; tên đang làm **lệch với `STATE.md`** | Kế hoạch đó đúng, khả thi, hay đủ |
+| **Chỗ nối ghi được thì có cách tắt** | Một chỗ nối không gọi tên **quyền** của nó, hoặc gọi bằng một chữ tự nghĩ ra; chỗ nối **ghi** hoặc **tiêu tiền** được mà không viết ra giới hạn và cách tắt | Bạn đã khai báo **đủ** chỗ nối — nó đọc file, không đi dò máy bạn |
+| **Sổ "đã tra" ngăn được lần tra lại** | Một mục **đã chọn** mà không ghi đã loại gì; chọn thứ bên ngoài mà không ghi giấy phép; giấy phép *không rõ* mà không có hạn xem lại, hoặc hạn đã qua | Bạn đã tra **đủ**, hay tra **đúng**, hay giấy phép ghi trong đó là thật |
+| **Quy ước tới được cả hai loại công cụ** | Chỉ có một trong hai tên `AGENTS.md` / `CLAUDE.md`; hoặc **cả hai đều mang nội dung** — hai nguồn sự thật | Công cụ **có đọc** file đó thật không, hay có làm theo không |
+| **Nhật ký còn được ghi** | Nhật ký trỏ tới hồ sơ đã mất; hoặc kho chạy tiếp **10 commit** mà không ai ghi thêm dòng nào | Mục nhật ký đó đúng, hay có ích |
 | **Phụ thuộc ngoài còn sống** *(`--ngoai`)* | URL đã khai báo mà chết | Nội dung sau URL còn đúng |
 
 Cổng cuối cần mạng nên **tuỳ chọn** — để `python kit/cong.py` chạy được cả lúc không có Internet.
@@ -108,9 +114,16 @@ Bộ mặc định:
 |---|---|---|
 | `PROJECT.md` | Dự án là gì, và **KHÔNG** làm gì? | Hiếm |
 | `STATE.md` | Đang ở đâu, việc kế tiếp? | Gần như mỗi phiên |
-| `CLAUDE.md` | Làm việc ở đây theo quy ước gì? | Khi quy ước đổi |
+| `AGENTS.md` | Làm việc ở đây theo quy ước gì? **Bản chính.** | Khi quy ước đổi |
+| `CLAUDE.md` | *(một dòng trỏ tới `AGENTS.md` — hai tên, một bản nội dung)* | — |
 | `QUYET-DINH/README.md` + `0001-mau.md` | Đã chốt gì, vì sao? | Khi quyết một chuyện khó lùi |
 | `viec/MAU-VIEC.md` | Việc đang làm là gì, đi tới đâu? | Mỗi việc một tờ |
+| `NHAT-KY.md` | Đã thử gì rồi, hỏng ra sao, **vì sao đổi hướng**? | Mỗi phiên một mục |
+| `DA-TRA.md` | Đã tra gì rồi, chọn gì, **loại gì và vì sao**? | Mỗi lần tra một mục |
+| `KET-NOI.md` | Công cụ **với tay ra được tới đâu**, và tắt bằng cách nào? | Khi cắm thêm hoặc gỡ một chỗ nối |
+| `GIAI-DOAN.md` | Có những giai đoạn nào, mỗi cái **cố ý hoãn lại** gì? | Khi sang giai đoạn khác |
+| `NGAN-SACH.md` | Cái gì đọc **mỗi phiên**, và nó được phép to đến đâu? | Hiếm — mỗi lần đổi phải viết lý do |
+| `boi-canh/` | *(nguyên liệu thô: bản phân tích dài, đoạn chat, kết quả đo)* | — |
 | `README.md` | Người mới bắt đầu từ đâu? | Hiếm |
 | `kit/cong.py` | *(bản sao của bộ cổng, để dự án chạy độc lập)* | — |
 
@@ -159,6 +172,142 @@ không có dòng đó thì bạn phải cãi lại từ đầu.
 
 ---
 
+## Vì sao có cả `AGENTS.md` lẫn `CLAUDE.md`
+
+**Không công cụ nào đọc cả hai tên.** Công cụ này tự đọc `CLAUDE.md`, công cụ hãng khác tự đọc
+`AGENTS.md`. Thiếu tên nào thì với công cụ đó, quy ước của bạn là **một thứ vô hình** — và nó im
+lặng y hệt lúc quy ước có mà không có tác dụng. Hai chuyện khác hẳn nhau ấy cho ra **cùng một quan
+sát**, nên phải chặn bằng file chứ không bằng niềm tin.
+
+Đo được ngày 2026-09-17, không phải phòng xa: một phép đối chứng suýt hỏng vì chỉ đặt một tên.
+
+> ### Hai **tên**, một **bản nội dung**.
+
+`AGENTS.md` mang nội dung. `CLAUDE.md` chỉ một dòng trỏ tới nó. Chép sang cả hai thì sửa bản này,
+bản kia cũ đi mà không ai biết bản nào cũ — và cổng báo đỏ đúng chuyện đó.
+
+---
+
+## Cái đắt nhất không phải file dài nhất
+
+Là file được đọc **lại mỗi phiên**.
+
+Một tài liệu 20 nghìn từ đọc một lần một tháng thì rẻ. Cùng 20 nghìn từ đó nằm trong danh sách
+*"đọc trước khi làm"* thì bạn trả **ở mỗi phiên, mãi mãi, trước khi nói được câu nào về việc thật**.
+
+Nên chia hai tầng, và **chỉ một tầng có ngân sách**:
+
+| | |
+|---|---|
+| **Tầng luôn đọc** | quy ước · dự án là gì · đang ở đâu. **Có** ngân sách, có cổng giữ |
+| **Tầng đọc khi cần** | tra cứu, hồ sơ, nhật ký, bối cảnh. **Không** ngân sách — càng đầy càng tốt, miễn là không ai bị bắt đọc hết |
+
+> ### Cách rẻ nhất để vượt ngân sách mà không ai thấy: để **lịch sử tích lại trong file trạng thái**.
+
+Nó lớn lên mỗi tuần một ít, không lần nào đáng để ai kêu, và sau ba tháng thì phần *"đang ở đâu"*
+chỉ còn là vài phần trăm của thứ bạn bắt mỗi phiên đọc.
+
+📌 Chính kho sinh ra bộ kit này dính đúng chuyện đó: `STATE.md` phình tới **26.664 từ**, chiếm
+**89%** tầng luôn đọc, trong khi dòng đầu của nó vẫn ghi *"mô tả hiện trạng, không phải lịch sử"*.
+Không cổng nào thấy, cho tới khi có cổng này. Lịch sử đã chuyển sang `boi-canh/`, không xoá dòng nào.
+
+Cổng in con số đo được **mỗi lần chạy**, kể cả khi xanh — một ngân sách chỉ nhìn thấy lúc vượt thì
+không ai canh được nó.
+
+---
+
+## Giai đoạn, và cái mỗi giai đoạn cố ý hoãn lại
+
+`STATE.md` nói bạn **đang ở** giai đoạn nào — một dòng. `GIAI-DOAN.md` nói có **những** giai đoạn
+nào. Hai file, hai câu hỏi khác nhau, và cổng đối chiếu chúng: khi chúng nói hai tên khác nhau thì
+**không file nào sai rõ ràng**, nên không ai sửa bên nào cả.
+
+Một giai đoạn là **một câu hỏi chưa trả lời được**, không phải một ô trong danh sách quy trình. Dự
+án một câu hỏi thì một giai đoạn — đừng nghĩ ra thêm cho đủ bộ.
+
+> ### Trường nặng nhất không phải `TRONG DO`. Là `HOAN LAI`.
+
+Một kế hoạch chỉ ghi *"giai đoạn này làm gì"* thì tháng sau sẽ có người kéo một việc của giai đoạn
+sau vào giai đoạn này — rất hợp lý, rất thuyết phục — và không ai còn nhớ rằng nó đã được **cân
+nhắc và gạt đi**, chứ không phải bị bỏ quên.
+
+Đó là đường đi quen thuộc nhất tới chuyện **đập đi xây lại**: không phải vì ai đó lười, mà vì phạm
+vi nở ra từng chút một cho tới lúc không còn chốt lại được nữa.
+
+📌 `THOAT KHI` phải **đo được**: có một con số, một đường dẫn có thật, hoặc một người cụ thể làm
+được một việc cụ thể. *"Xong hết task"* không dùng được — task là thứ bạn chọn, mục tiêu là thứ
+phải thành thật.
+
+---
+
+## Trước khi cắm thêm một chỗ nối
+
+Plugin, connector, MCP, khóa API. Hỏi một câu trước: **việc nào trong dự án này đang cần nó?** Trả
+lời được thì ghi vào `KET-NOI.md`. Trả lời không được thì đừng cắm vào.
+
+> ### Một chỗ nối không phải một tính năng. Nó là một **quyền**.
+
+Thứ bạn thêm không phải *"khả năng gửi mail"*, mà là *"từ giờ con AI này gửi mail được"*. Hai câu đó
+nghe giống nhau và hết giống nhau đúng lúc một thứ chạy sai.
+
+Khác `CHO-DUA.md` chỗ nào: **chỗ dựa** là thứ mất thì mình chết. **Chỗ nối** là thứ mình với tới
+được. Một thứ có thể là cả hai, và lúc đó nó nằm ở cả hai file — không phải trùng lặp.
+
+Cổng đòi đúng ba thứ, và chỉ đòi khi chỗ nối đó **ghi** hoặc **tiêu tiền** được:
+
+| | |
+|---|---|
+| `QUYEN` | một trong ba: `doc` · `ghi` · `tieu tien`. Một chữ tự nghĩ ra thì mỗi người hiểu một kiểu |
+| `GIOI HAN` | cái gì nó **không** được làm, và cái gì chặn |
+| `TAT RA SAO` | một dòng. Lúc cần đến dòng này thì không ai còn bình tĩnh đi tìm |
+
+📌 Mục **"Cố ý KHÔNG nối"** đứng trước danh sách. Danh sách đã nối thì tự nó dài ra; danh sách **từ
+chối** thì không ai viết hộ — và ba tháng nữa bạn sẽ nối lại đúng thứ hôm nay bạn đã từ chối.
+
+---
+
+## Trước khi dựng cái gì mất hơn nửa ngày
+
+Tra xem có ai làm sẵn chưa. **Đọc giấy phép trước khi đọc code** — một thứ dùng được về kỹ thuật mà
+không dùng được về giấy phép thì biết sớm rẻ hơn biết muộn.
+
+Ghi vào `DA-TRA.md`, **kể cả khi kết luận là tự dựng**. Một mục là một **câu hỏi** đã tra, không
+phải một công cụ: *"chọn thư viện biểu đồ nào"* là một mục, *"Chart.js"* thì không.
+
+> ### Dòng đắt nhất không phải `CHON`. Là `DA LOAI`.
+
+Ba tuần nữa sẽ có người hỏi *"thế đã xem cái X chưa?"*. Không có dòng nào trả lời thì bạn tra lại từ
+đầu — và lần này có thể ra kết luận ngược, không phải vì sự thật đổi, mà vì lý do cũ đã mất.
+
+Cổng bắt đúng ba chuyện: mục đã chọn mà không ghi đã loại gì · chọn thứ bên ngoài mà không ghi giấy
+phép · giấy phép *không rõ* mà không có hạn xem lại. Ghi *"không rõ"* là **trung thực và được
+phép** — để nó không có hạn mới là bỏ quên.
+
+---
+
+## Việc cuối cùng trước khi đóng máy
+
+Thêm một mục vào **đầu** `NHAT-KY.md`. Ba dòng là đủ.
+
+```
+## 2026-09-17 — thử đổi cách lưu ảnh
+
+DA LAM:     chuyển sang lưu ngoài, bỏ cột blob
+BIET THEM:  bản cũ chậm không phải vì ảnh, là vì thiếu index
+CON TREO:   chưa đo lại sau khi thêm index
+HO SO:      `boi-canh/` — đặt tên YYYY-MM-DD-viec-gi.md
+```
+
+`QUYET-DINH/` giữ cái **đã chốt**. Nhật ký giữ cái **chưa chốt** — đã thử gì, hỏng ra sao, lúc đó
+tưởng gì là đúng. Đó là phần không ai nhớ nổi sau ba tuần, và là phần khiến người ta **đập đi xây
+lại lần thứ hai** vì không còn ai biết lần thứ nhất đã dừng ở đâu.
+
+Dòng `HO SO` trỏ vào `boi-canh/` — chỗ để nguyên liệu thô. Cổng kiểm đúng chiều ngược lại: nhật ký
+trỏ tới hồ sơ **không còn tồn tại** thì nó báo đỏ. Một kết luận không còn gì đỡ phía dưới là thứ
+không tin được.
+
+---
+
 ## Giới hạn, nói trước
 
 - **Bộ kit này không kiểm code của bạn.** Nó kiểm *cách dự án tự giữ mình*. Test, build, lint là việc
@@ -167,6 +316,9 @@ không có dòng đó thì bạn phải cãi lại từ đầu.
   bắt được mọi thứ. Một cổng qua được nó vẫn có thể mù trước thứ khác.
 - **Mọi thứ in ra là ASCII**, vì console Windows là cp1252 và `print` tiếng Việt có dấu thì
   `UnicodeEncodeError`. Đây là số đo trên máy thật, không phải phòng xa.
+- **Cổng nhật ký chỉ kiểm được một nửa bằng `--tu-kiem`.** Phần "trỏ tới hồ sơ đã mất" thì có;
+  phần "10 commit mà không ai ghi" thì không, vì bản chép sandbox không mang theo `.git`. Phần
+  đó được thử riêng bằng tay, và giới hạn này in ra ngay trong dòng *KHÔNG chứng minh* của cổng.
 - **Chưa ai ngoài tác giả dùng bộ này trên một dự án mới từ đầu tới cuối.**
 
 ---

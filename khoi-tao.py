@@ -13,7 +13,7 @@ Ban tieu chuan goc liet ke 25 artifact "gan nhu du an nao cung phai co". Cham
 tren du an that da chay 20 ngay, 180 commit va da phat hanh: 12 co, 13 KHONG
 BAO GIO duoc tao, du an van chay.
 
-Nen bo nay tao 8 file, va them 6 file neu ban goi --day-du. Them artifact khi
+Nen bo nay tao 15 file, va them 6 file neu ban goi --day-du. Them artifact khi
 co mot CAU HOI THAT chua co cho tra loi — dung tao truoc roi tim viec cho no.
 
 Co hai thu CO Y KHONG co file rieng: nhat ky thay doi va so bang chung. Ca hai
@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.0.0"
+PHIEN_BAN = "1.6.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -120,10 +120,13 @@ chua quyet giai doan nay hoi cau gi.>
 <Giai doan la MOT CAU HOI ban chua tra loi duoc, khong phai mot o trong danh
 sach quy trinh. Du an mot cau hoi thi mot giai doan.>
 
-GIAI DOAN: <ten ngan>
+GIAI DOAN: <ten ngan. Phai KHOP voi giai doan dang lam trong `GIAI-DOAN.md`>
 THOAT KHI: <mot cau. Phai co SO, hoac co mot NGUOI CU THE lam duoc mot VIEC CU
             THE. "Xong het task" khong dung duoc — task la thu ban chon, muc
             tieu la thu phai thanh that.>
+
+<Ca day giai doan, va cai moi giai doan CO Y hoan lai, nam o `GIAI-DOAN.md`.
+File nay chi noi ban dang o dau.>
 
 ## Dang chay ban nao
 
@@ -160,7 +163,7 @@ nhat: phien sau doc code la suy ra duoc hai muc tren, nhung KHONG suy ra duoc
 cho ban dang nghi ngo.>
 """
 
-CLAUDE = """# Lam viec trong du an nay
+AGENTS = """# Lam viec trong du an nay
 
 > File nay tra loi: **lam viec o day theo quy uoc gi?**
 > Cong cu AI tu doc file nay moi phien. Viet ngan, viet thu that su can.
@@ -204,11 +207,109 @@ python kit/cong.py
 Doc ca dong "KHONG chung minh" cua tung cong. Mot cong xanh chi co nghia la thu
 no nhin thi khong hong.
 
+## Ba vai, va ai duoc quyet cai gi
+
+| Vai | Quyet cai gi | KHONG duoc quyet |
+|---|---|---|
+| Chu du an | du an la gi, khong lam gi, dung o dau | cach hien thuc |
+| Nguoi lam (nguoi hay AI) | cach hien thuc, thu tu buoc | doi huong du an |
+| Nguoi phan quyet | viec nay da xong CHUA | "cho qua lan nay" |
+
+Ai lam thi KHONG tu nhan viec cua minh la xong. Lam ra bang chung, nguoi khac
+doc bang chung roi moi noi xong. Khong co nguoi khac thi doc lai vao hom sau,
+va phai doc BANG CHUNG chu khong doc lai loi ke.
+
+## Viec KHONG giao duoc — dung lai va hoi
+
+Bon chieu. Viec nao nang o MOT chieu thoi cung dung:
+
+- **hau qua lon**      — hong thi anh huong ra ngoai may nay
+- **kho lui**          — xoa du lieu, doi lich su, gui ra ngoai, tra tien
+- **cham tien hoac du lieu ca nhan**
+- **sai am tham**      — hong ma khong co gi keu len
+
+Khong phai "viec kho thi dung". La: cai gia cua mot lan sai o day khong nam
+trong tam ma nguoi giao viec chiu duoc.
+
+Cach dung cho dung: noi DANG O DAU, VUA BIET GI, CHUA CHAC CHO NAO. Ba dong
+do phien sau khong tu suy ra duoc.
+
+## Khi chay nhieu hon mot con AI
+
+Tach viec ra cho khac chi khi viec do **doc duoc mot minh** — nguoi nhan khong
+can doc lai ca cuoc hoi thoai nay moi hieu. Khong doc duoc mot minh thi tach
+ra chi lam ton them lan ke lai.
+
+Giao gi:  muc tieu, ranh gioi, va NHIN VAO DAU DE BIET LA XONG.
+Nhan lai: bang chung, khong phai loi ke. "Da xong" khong phai ket qua.
+
+Hai con AI sua cung mot file thi cai sau de len cai truoc ma khong ai biet.
+Chia theo FILE, khong chia theo y tuong.
+
+## Truoc khi dung cai gi mat hon nua ngay
+
+Tra xem co ai lam san chua. Doc giay phep TRUOC khi doc code — mot thu viec
+dung duoc ve ky thuat ma khong dung duoc ve giay phep thi biet som re hon biet
+muon.
+
+Ghi ket qua vao `DA-TRA.md`, ke ca khi ket luan la TU DUNG. Dong dat nhat
+khong phai cai ban chon, la cai ban LOAI va vi sao — do la dong khien lan sau
+khong ai phai tra lai tu dau.
+
+## Cai gi doc moi phien, cai gi doc khi can
+
+Muc "Doc truoc khi lam" o dau file nay la thu duoc doc LAI MOI PHIEN. No co
+ngan sach, ghi trong `NGAN-SACH.md`, va co cong giu.
+
+Moi thu khac — nhat ky, boi canh, so tra cuu, ho so tung viec — doc KHI CAN.
+Khong doc chung khong phai bo sot.
+
+Cach re nhat de pha chuyen nay ma khong ai thay: de lich su tich lai trong
+`STATE.md`. Trang thai la CAI DANG DUNG; cai da qua thuoc ve nhat ky.
+
+## Truoc khi cam them mot cho noi
+
+Plugin, connector, MCP, khoa API — hoi mot cau truoc: **viec nao trong du an
+nay dang can no?** Tra loi duoc thi ghi vao `KET-NOI.md` kem QUYEN no co, cho
+no cham toi, va cach tat. Tra loi khong duoc thi dung cam vao.
+
+Mot cho noi khong phai mot tinh nang, no la MOT QUYEN. Them mot cai la mo rong
+pham vi mot lan sai — va pham vi do khong con nam trong thu muc nay nua.
+
+## Ban giao giua hai phien
+
+Phien sau khong co tri nho cua phien nay. Thu duy nhat di qua duoc la file:
+
+- `STATE.md`   — dang o dau, viec ke tiep
+- `NHAT-KY.md` — da thu gi, hong ra sao, vi sao doi huong
+- `QUYET-DINH/` — cai da chot, va ly do
+
+Viet ba dong nhat ky truoc khi dong may. Dong dat nhat la dong CHUA CHAC.
+
 ## Khong lam
 
 - Khong commit bi mat that.
 - Khong `git reset --hard` de cay cho sach.
 - Khong tu doi huong du an; de nghi thi duoc, tu doi thi khong.
+- Khong chep quy uoc sang file khac. File nay la ban chinh; cho khac tro toi
+  no. Hai ban sao thi mot ban se cu di ma khong ai biet ban nao cu.
+"""
+
+CLAUDE = """# Quy uoc: doc `AGENTS.md`
+
+Quy uoc lam viec cua du an nay nam o `AGENTS.md`. Doc file do truoc khi lam.
+
+@AGENTS.md
+
+---
+
+Vi sao hai file ma chi mot ban noi dung: cac cong cu AI khong doc cung mot ten
+file. Co cong cu tu doc `CLAUDE.md`, co cong cu tu doc `AGENTS.md`. Thieu ten
+nao thi voi cong cu do, quy uoc cua ban la MOT THU VO HINH — va no im lang y
+het luc quy uoc co ma khong co tac dung.
+
+Nen: hai TEN, mot BAN NOI DUNG. Chep noi dung sang day nua thi thanh hai nguon
+su that, va cong `kit/cong.py` se bao do.
 """
 
 QUYET_DINH = """# Quyet dinh
@@ -372,6 +473,198 @@ thong DA CO nhung thu do. Them mot dong khi du an moc them mot thu that, khong
 phai khi ban doc thay mot danh sach dai hon.
 """
 
+NGAN_SACH = """# Ngan sach ngu canh
+
+> Cai dat nhat khong phai file dai nhat. La file duoc doc LAI MOI PHIEN.
+
+Mot tai lieu 20 nghin tu doc mot lan mot thang thi re. Mot file 20 nghin tu
+nam trong danh sach "doc truoc khi lam" thi ban tra tien cho no O MOI PHIEN,
+mai mai, TRUOC KHI noi duoc cau nao ve viec that.
+
+Nen chia lam hai tang, va chi mot tang co ngan sach:
+
+  TANG LUON DOC    quy uoc + du an la gi + dang o dau. Co ngan sach.
+  TANG DOC KHI CAN tra cuu, ho so, nhat ky, boi canh. KHONG co ngan sach —
+                   cang day cang tot, mien la khong ai bi bat doc het.
+
+Cach re nhat de vuot ngan sach ma khong ai thay: de LICH SU tich lai trong
+file trang thai. No lon len moi tuan mot it, khong lan nao dang de ai keu, va
+sau ba thang thi phan "dang o dau" chi con la 5% cua thu ban bat moi phien doc.
+
+Kiem:  python kit/cong.py
+
+## Cai doc MOI PHIEN
+
+NGAN SACH: 6000 tu
+GOM:       `AGENTS.md`, `CLAUDE.md`, `PROJECT.md`, `STATE.md`
+VI SAO:    <Con so nay la mot LUA CHON, khong phai mot hang so do duoc. Gia
+            tri cua no khong nam o cho no toi uu, nam o cho no DUOC KHAI RA VA
+            CO CONG GIU. Sua no thi sua o day, va viet ly do — mot ngan sach
+            tu nhien to len la mot ngan sach khong ton tai.>
+
+## Cai chi doc KHI CAN
+
+<Ke ra day cho tra cuu, de nguoi sau biet rang KHONG doc chung la dung, chu
+khong phai bo sot.>
+
+- `NHAT-KY.md`, `boi-canh/` — doc khi can biet vi sao hoi do lam the
+- `DA-TRA.md`, `KET-NOI.md`, `GIAI-DOAN.md` — doc khi dung toi
+"""
+
+GIAI_DOAN = """# Giai doan
+
+> `STATE.md` noi ban DANG o giai doan nao. File nay noi co nhung giai doan
+> nao, va moi giai doan CO Y HOAN LAI cai gi.
+
+Mot giai doan la MOT CAU HOI ban chua tra loi duoc, khong phai mot o trong
+danh sach quy trinh. Du an mot cau hoi thi mot giai doan — dung nghi ra them
+cho du bo.
+
+Truong dat nhat o day la HOAN LAI. Mot ke hoach chi ghi "giai doan nay lam
+gi" thi den thang sau se co nguoi keo mot viec cua giai doan 3 vao giai doan
+1, rat hop ly, rat thuyet phuc — va khong ai con nho rang no da duoc CAN NHAC
+VA GAT DI, chu khong phai bi bo quen. Do la duong di quen thuoc nhat toi chuyen
+dap di xay lai.
+
+Ten giai doan dang lam phai KHOP voi dong GIAI DOAN trong `STATE.md`. Hai file
+noi hai ten khac nhau thi khong file nao sai ro rang, va do moi la kieu kho
+chiu nhat.
+
+Kiem:  python kit/cong.py
+
+---
+
+## <ten giai doan — viet thanh CAU HOI chua tra loi duoc>
+
+TRANG THAI:   <chua toi | dang lam | xong>
+THOAT KHI:    <mot cau DO DUOC. Phai co SO, hoac mot DUONG DAN co that, hoac
+               mot NGUOI CU THE lam duoc mot VIEC CU THE. "Xong het task"
+               khong dung duoc — task la thu ban chon, muc tieu la thu phai
+               thanh that.>
+TRONG DO:     <lam gi trong giai doan nay>
+HOAN LAI:     <cai gi CO Y de lai, va de lai toi giai doan nao. Viet ra thi no
+               la mot lua chon; khong viet thi thang sau no quay lai>
+DUNG LAI NEU: <dau hieu bao DUNG CA GIAI DOAN, khong phai co them. Dien o nay
+               luc dang tinh tao, vi luc can den no thi khong ai tinh tao>
+
+<!-- Chep khoi tren xuong duoi day cho moi giai doan. -->
+"""
+
+KET_NOI = """# Cho noi
+
+> Plugin, connector, MCP, khoa API, webhook — thu ban cam vao du an de mot
+> cong cu voi tay ra NGOAI thu muc nay.
+
+Doc ky mot cau: MOT CHO NOI KHONG PHAI MOT TINH NANG, NO LA MOT QUYEN. Cai
+ban them khong phai "kha nang gui mail", la "tu gio con AI nay gui mail duoc".
+Hai cau do nghe giong nhau va khac han nhau luc mot thu chay sai.
+
+Khac `CHO-DUA.md` cho nao: cho dua la thu MAT THI MINH CHET. Cho noi la thu
+MINH VOI TOI DUOC. Mot thu co the vua la ca hai, va luc do no dang o ca hai
+file — dung, khong phai trung lap.
+
+Kiem:  python kit/cong.py
+
+## Co y KHONG noi
+
+<Viet o day thu ban CO THE noi ma quyet dinh khong. Vi sao muc nay dung truoc:
+danh sach da noi thi tu no dai ra, con danh sach TU CHOI thi khong ai viet ho.
+Khong co no, ba thang nua ban se noi lai dung thu hom nay ban da tu choi, va
+khong con ly do cu de doc.>
+
+- <vi du: khong noi thang vao co so du lieu that — chi qua ban sao>
+
+---
+
+## <ten cho noi>
+
+DUNG DE:     <viec gi trong du an nay can no. Khong tra loi duoc thi go ra>
+QUYEN:       <doc | ghi | tieu tien>
+CHAM TOI:    <no voi tay ra toi dau ngoai thu muc nay>
+GIOI HAN:    <cai gi no KHONG duoc lam, va cai gi CHAN — nguoi hay may>
+BAT BOI:     <ai bat, ngay nao>
+TAT RA SAO:  <tat bang cach nao. Mot dong. Luc can den dong nay thi khong ai
+              con binh tinh di tim>
+
+<!-- Chep khoi tren xuong duoi day cho moi cho noi. -->
+"""
+
+DA_TRA = """# Da tra
+
+> Truoc khi dung mot thu mat hon nua ngay, tra xem co ai lam san chua. Tra
+> xong thi ghi vao day — KE CA khi ket luan la tu dung.
+
+Vi sao file nay ton tai: cai dat nhat khong phai cai ban CHON, la cai ban
+LOAI. Ba tuan nua se co nguoi (hoac chinh ban) hoi "the da xem cai X chua?".
+Khong co dong nao tra loi thi ban tra lai tu dau, va lan nay co the ra ket
+luan nguoc — khong phai vi su that doi, ma vi ban quen mat ly do cu.
+
+Mot muc = mot cau hoi da tra, khong phai mot cong cu. "Chon thu vien bieu do
+nao" la mot muc; "Chart.js" thi khong.
+
+Kiem:  python kit/cong.py
+
+---
+
+## <can gi — viet thanh CAU HOI, khong phai ten cong cu>
+
+NGAY:      {ngay}
+DA TRA:    <tra o dau, thay nhung ung vien nao>
+CHON:      <cai nao — hoac "tu dung", do cung la mot lua chon>
+VI SAO:    <ly do chon>
+DA LOAI:   <loai cai nao, VI SAO. Day la dong khien lan sau khoi tra lai>
+GIAY PHEP: <MIT / Apache-2.0 / GPL-3.0 / khong ro / khong ap dung>
+XEM LAI:   <ngay, hoac "khong can". BAT BUOC co ngay neu giay phep "khong ro">
+
+<!-- Chep khoi tren xuong duoi dong nay cho moi lan tra. Muc cu de nguyen. -->
+"""
+
+NHAT_KY = """# Nhat ky
+
+> Moi phien lam viec them MOT muc, DAT LEN TREN cung, ngay duoi dong ke ngang.
+> KHONG sua muc cu. Muc cu sai thi viet muc moi noi no sai o dau.
+
+QUYET-DINH/ giu cai DA CHOT. File nay giu cai CHUA CHOT: da thu gi, hong ra
+sao, vi sao doi huong, cai gi luc do tuong la dung. Do la phan khong ai nho
+noi sau ba tuan — va la phan khien nguoi ta dap di xay lai lan thu hai, vi
+khong con ai biet lan thu nhat da dung o dau.
+
+Nguyen lieu tho (ban phan tich dai, doan chat, ket qua do) de trong `boi-canh/`
+roi tro toi tu dong HO SO cua muc tuong ung.
+
+Kiem:  python kit/cong.py
+
+---
+
+## {ngay} — khoi tao du an
+
+DA LAM:     dung bo khung bang kit/khoi-tao.py
+BIET THEM:  <chua co gi. Muc that dau tien se nam TREN muc nay>
+CON TREO:   dien PROJECT.md, nhat la muc "KHONG phai muc tieu"
+HO SO:      <chua co. Khi co thi ghi duong dan vao day>
+"""
+
+BOI_CANH = """# boi-canh — cho de nguyen lieu tho
+
+Cho nay KHONG chua tai lieu. No chua thu de doc lai khi ai do hoi "vi sao hoi
+do lam the": ban phan tich dai, doan chat quan trong, ket qua do, log.
+
+Ten file:  YYYY-MM-DD-<viec-gi>.md
+
+BA LUAT
+
+1. KHONG sua file da nam o day. No la ban GHI, khong phai ban thao. Sua no la
+   xoa mat ly do cu — ma ly do cu moi la thu ban can khi nhin lai.
+
+2. Moi file o day phai duoc MOT muc trong NHAT-KY.md tro toi. Khong ai tro toi
+   thi khong ai tim ra, va sau sau thang no thanh rac roi bi don di cung voi
+   thu dang gia. Cong kiem dung chieu nguoc lai: NHAT-KY tro toi cho khong co
+   that.
+
+3. KHONG de bi mat that vao day. Doan chat hay dinh kem khoa API, mat khau, du
+   lieu khach hang thi cat truoc khi luu. Cong "Bi mat" soi ca thu muc nay.
+"""
+
 CONG_CU = """# Cho dua
 
 > File nay tra loi: **du an nay dang dua vao nhung gi ben ngoai chinh no?**
@@ -478,7 +771,17 @@ Du an nay dung bo cong cua Project Operating System.
 
 1. `PROJECT.md` — du an la gi, va KHONG lam gi
 2. `STATE.md` — dang o dau, viec ke tiep la gi
-3. `CLAUDE.md` — lam viec o day theo quy uoc gi
+3. `AGENTS.md` — lam viec o day theo quy uoc gi (`CLAUDE.md` tro toi no)
+4. `NHAT-KY.md` — da thu gi roi, vi sao doi huong
+5. `DA-TRA.md` — da tra gi roi, chon gi, loai gi
+6. `KET-NOI.md` — cong cu voi tay ra duoc toi dau, va tat bang cach nao
+7. `GIAI-DOAN.md` — co nhung giai doan nao, moi cai hoan lai cai gi
+8. `NGAN-SACH.md` — cai gi doc moi phien, va no duoc phep to den dau
+
+## Truoc khi dong may
+
+Them mot muc vao dau `NHAT-KY.md`. Ba dong cung duoc. Thu dat nhat la dong
+CON TREO va cho dang nghi ngo — phien sau KHONG tu suy ra duoc.
 
 ## Truoc khi ban giao bat cu viec gi
 
@@ -533,10 +836,17 @@ def main():
     da_tao = 0
     da_tao += viet(goc, "PROJECT.md", PROJECT.format(ten=ten))
     da_tao += viet(goc, "STATE.md", STATE.format(ngay=HOM_NAY))
+    da_tao += viet(goc, "AGENTS.md", AGENTS)
     da_tao += viet(goc, "CLAUDE.md", CLAUDE)
     da_tao += viet(goc, "QUYET-DINH/README.md", QUYET_DINH)
     da_tao += viet(goc, "QUYET-DINH/0001-mau.md", QD_MAU.format(ngay=HOM_NAY))
     da_tao += viet(goc, "viec/MAU-VIEC.md", VIEC)
+    da_tao += viet(goc, "NHAT-KY.md", NHAT_KY.format(ngay=HOM_NAY))
+    da_tao += viet(goc, "DA-TRA.md", DA_TRA.format(ngay=HOM_NAY))
+    da_tao += viet(goc, "KET-NOI.md", KET_NOI)
+    da_tao += viet(goc, "GIAI-DOAN.md", GIAI_DOAN)
+    da_tao += viet(goc, "NGAN-SACH.md", NGAN_SACH)
+    da_tao += viet(goc, "boi-canh/README.md", BOI_CANH)
     da_tao += viet(goc, "README.md", README_KIT)
 
     if day_du:
