@@ -11,7 +11,7 @@ VI SAO NO TON TAI
 -----------------
 Mot bo tieu chuan viet ra giay duoc thi hanh boi chinh nguoi bi rang buoc. Do
 khong phai mot ranh gioi. Du an sinh ra file nay da do duoc dieu do: no GOI TEN
-co che loi cua chinh no bang chu, roi van lap lai co che do 16 lan — sau lan
+co che loi cua chinh no bang chu, roi van lap lai co che do 17 lan — sau lan
 trong so do xay ra NGAY TRONG LUC dang viet ve co che ay, hoac dang
 dung chinh cai cong sinh ra de bat no.
 
@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.0.0"
+PHIEN_BAN = "1.0.1"
 
 GOC = os.getcwd()
 NL = chr(10)
