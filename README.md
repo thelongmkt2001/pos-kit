@@ -188,6 +188,30 @@ bản kia cũ đi mà không ai biết bản nào cũ — và cổng báo đỏ 
 
 ---
 
+## Để các cổng tự chạy, thay vì trông vào trí nhớ
+
+Bộ kit dựng sẵn `hooks/pre-push`. Bật một lần cho mỗi bản clone:
+
+```bash
+git config core.hooksPath hooks
+```
+
+Từ đó `git push` chạy `kit/cong.py` trước, và **huỷ lần đẩy** nếu có cổng nào đỏ. Đo trên một dự án
+vừa khởi tạo: **0,7 giây**.
+
+Vì sao vẫn phải gõ một dòng: **file** đi theo bản clone vì nó nằm trong kho; **dòng cấu hình** thì
+không — nó ở `.git/config`, không thuộc nội dung kho. Đã đo tại chỗ, không phải đoán.
+
+> ### Đây là một cái **rào**, không phải một cái **khoá**.
+
+`git push --no-verify` bỏ qua nó hoàn toàn — cũng đã đo. Nó chặn cái **quên**, không chặn cái **cố
+ý**. Muốn tầng không tắt được thì phải là thứ chạy ở nơi người đẩy không với tới, ví dụ CI.
+
+📌 Hook tự chọn `.venv` của dự án nếu có. Gọi `python` trần ở một dự án có môi trường riêng thì mọi
+phép kiểm hỏng vì thiếu thư viện — **đỏ vì lý do sai**, còn tệ hơn không có hook.
+
+---
+
 ## Cái đắt nhất không phải file dài nhất
 
 Là file được đọc **lại mỗi phiên**.

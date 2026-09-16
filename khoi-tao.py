@@ -13,7 +13,7 @@ Ban tieu chuan goc liet ke 25 artifact "gan nhu du an nao cung phai co". Cham
 tren du an that da chay 20 ngay, 180 commit va da phat hanh: 12 co, 13 KHONG
 BAO GIO duoc tao, du an van chay.
 
-Nen bo nay tao 15 file, va them 6 file neu ban goi --day-du. Them artifact khi
+Nen bo nay tao 16 file, va them 6 file neu ban goi --day-du. Them artifact khi
 co mot CAU HOI THAT chua co cho tra loi — dung tao truoc roi tim viec cho no.
 
 Co hai thu CO Y KHONG co file rieng: nhat ky thay doi va so bang chung. Ca hai
@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.6.0"
+PHIEN_BAN = "1.7.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -473,6 +473,34 @@ thong DA CO nhung thu do. Them mot dong khi du an moc them mot thu that, khong
 phai khi ban doc thay mot danh sach dai hon.
 """
 
+HOOK = """#!/bin/sh
+# Chay cac cong TRUOC khi day len. Thoat khac 0 la huy ca lan day.
+#
+# BAT NO LEN (mot lan cho moi ban clone):
+#
+#     git config core.hooksPath hooks
+#
+# Vi sao phai go mot dong: FILE nay di theo ban clone vi no nam trong kho.
+# DONG CAU HINH thi khong — no o .git/config, khong thuoc noi dung kho.
+#
+# DAY LA MOT CAI RAO, KHONG PHAI MOT CAI KHOA. `git push --no-verify` bo qua
+# no hoan toan. No chan cai quen, khong chan cai co y.
+
+set -e
+
+# Dung trinh Python cua du an neu co. Goi `python` tran o mot du an co moi
+# truong rieng thi moi phep kiem hong vi thieu thu vien — tuc la hook bao do
+# vi LY DO SAI, con te hon la khong co hook.
+if [ -x ".venv/Scripts/python.exe" ]; then PY=".venv/Scripts/python.exe"
+elif [ -x ".venv/bin/python" ]; then PY=".venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then PY=python3
+else PY=python
+fi
+export PYTHONIOENCODING=utf-8
+
+$PY kit/cong.py
+"""
+
 NGAN_SACH = """# Ngan sach ngu canh
 
 > Cai dat nhat khong phai file dai nhat. La file duoc doc LAI MOI PHIEN.
@@ -805,6 +833,15 @@ Mot phep kiem chua bao gio bao do thi ban chua biet no bao do duoc khong.
 """
 
 
+def _cho_chay(p):
+    """Bat bit thuc thi. Tren Linux/macOS thieu no thi git IM LANG bo qua hook,
+    va mot hook bi bo qua khong khac gi mot hook khong ton tai."""
+    try:
+        os.chmod(p, 0o755)
+    except OSError:
+        pass
+
+
 def viet(goc, ten, noi_dung):
     p = os.path.join(goc, ten)
     if os.path.exists(p):
@@ -846,6 +883,8 @@ def main():
     da_tao += viet(goc, "KET-NOI.md", KET_NOI)
     da_tao += viet(goc, "GIAI-DOAN.md", GIAI_DOAN)
     da_tao += viet(goc, "NGAN-SACH.md", NGAN_SACH)
+    da_tao += viet(goc, "hooks/pre-push", HOOK)
+    _cho_chay(os.path.join(goc, "hooks", "pre-push"))
     da_tao += viet(goc, "boi-canh/README.md", BOI_CANH)
     da_tao += viet(goc, "README.md", README_KIT)
 
@@ -883,6 +922,9 @@ def main():
     print("  nhat la muc 'KHONG phai muc tieu'. Cho do quan trong hon no trong.")
     print()
     print("  Roi chay:   python kit/cong.py")
+    print()
+    print("  Muon cac cong tu chay moi lan day len, go mot lan:")
+    print("      git config core.hooksPath hooks")
     print("  " + "-" * 62)
     return 0
 

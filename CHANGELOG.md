@@ -8,6 +8,45 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.7.0] — 2026-09-17
+
+Bộ nền **15 → 16 file**. Số cổng không đổi (16).
+
+### Thêm
+
+- **`hooks/pre-push`** — bộ kit dựng sẵn một git hook chạy `kit/cong.py` **trước mỗi lần đẩy lên**,
+  và **huỷ lần đẩy** nếu có cổng nào đỏ. Bật một lần cho mỗi bản clone:
+
+  ```bash
+  git config core.hooksPath hooks
+  ```
+
+  Đo được: **0,7 giây** trên một dự án vừa khởi tạo. Đã chứng minh hai chiều trên một dự án thật có
+  remote — đẩy sạch thì qua, gieo một trạng thái ngoài danh sách thì chặn với mã thoát 1.
+
+  Hook tự chọn `.venv` của dự án nếu có. Gọi `python` trần ở một dự án có môi trường riêng thì mọi
+  phép kiểm hỏng vì thiếu thư viện — **đỏ vì lý do sai**, còn tệ hơn không có hook.
+
+  ⚠️ Đây là một cái **rào**, không phải một cái **khoá**. `git push --no-verify` bỏ qua hoàn toàn —
+  cũng đã đo. Nó chặn cái **quên**, không chặn cái **cố ý**.
+
+  `khoi-tao.py` bật luôn bit thực thi cho file này: trên Linux/macOS thiếu bit đó thì git **im lặng
+  bỏ qua** hook, và một hook bị bỏ qua không khác gì một hook không tồn tại.
+
+### Sửa
+
+- **`bo-qua.txt` biết miễn trừ ĐÍCH của một lệnh**, không chỉ miễn trừ cả file. Dòng bắt đầu bằng
+  `-> ` là một đích được tha, ví dụ `-> pos-kit/`.
+
+  Vì sao cần: một file tài liệu phục vụ hai kho sẽ có đúng một lệnh sai ở kho này và đúng ở kho kia.
+  Miễn trừ cả file thì những lệnh **đúng** trong đó cũng thôi được kiểm — báo ít hơn sự thật. Khai
+  báo này vẫn được **in ra mỗi lần chạy**, như mọi miễn trừ khác.
+
+### Nâng từ 1.6.0
+
+Chép lại `cong.py` và `khoi-tao.py`, rồi `python pos-kit/khoi-tao.py .` — nó bỏ qua file đã có và
+chỉ tạo `hooks/pre-push`. Không cổng nào đỏ thêm vì bước này.
+
 ## [1.6.0] — 2026-09-17
 
 Bản lớn. Bộ nền **8 → 15 file**, số cổng **10 → 16**.

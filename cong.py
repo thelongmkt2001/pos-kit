@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.6.0"
+PHIEN_BAN = "1.7.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -66,19 +66,29 @@ TEP_BO_QUA = "kit/bo-qua.txt"
 
 
 def nap_bo_qua(goc):
-    """Tra ve (danh sach tien to duong dan, duong dan file khai bao)."""
+    """Tra ve (tien to duong dan, tien to DICH cua lenh, duong dan file khai bao).
+
+    Dong bat dau bang "-> " la mien tru DICH: no tha mot lenh tro toi cho do,
+    va KHONG tha ca file chua lenh ay. Vi sao can phan biet: mot file tai lieu
+    phuc vu hai kho se co dung mot lenh sai o kho nay va dung o kho kia. Mien
+    tru ca file thi cac lenh con lai trong do cung thoi duoc kiem.
+    """
     f = os.path.join(goc, TEP_BO_QUA)
     if not os.path.exists(f):
         f2 = os.path.join(goc, "bo-qua.txt")
         if not os.path.exists(f2):
-            return [], None
+            return [], [], None
         f = f2
-    ra = []
+    ra, dich = [], []
     for d in doc(f).splitlines():
         d = d.strip()
-        if d and not d.startswith("#"):
+        if not d or d.startswith("#"):
+            continue
+        if d.startswith("->"):
+            dich.append(d[2:].strip().replace("\\", "/").rstrip("/"))
+        else:
             ra.append(d.replace("\\", "/").rstrip("/"))
-    return ra, ngan(goc, f)
+    return ra, dich, ngan(goc, f)
 
 
 def bi_bo_qua(duong_dan_ngan, ds):
@@ -278,11 +288,16 @@ TEN_TAI_LIEU = {"readme.md", "readme.rst", "readme.txt", "contributing.md",
 def cong_lenh_tai_lieu(goc):
     """Lenh ghi trong tai lieu co tro toi file co that khong."""
     ra, hong, da_soi = [], [], 0
-    bo, tep_bo = nap_bo_qua(goc)
+    bo, bo_dich, tep_bo = nap_bo_qua(goc)
     if bo:
         ra.append(("--", "Bo qua %d cho da khai bao trong %s" % (len(bo), tep_bo)))
         for x in bo:
             ra.append(("  ", "   %s" % x))
+    if bo_dich:
+        ra.append(("--", "Bo qua %d DICH lenh da khai bao trong %s"
+                   % (len(bo_dich), tep_bo)))
+        for x in bo_dich:
+            ra.append(("  ", "   -> %s" % x))
     for f in moi_file(goc, (".md", ".rst", ".txt")):
         if os.path.basename(f).lower() not in TEN_TAI_LIEU:
             continue
@@ -294,6 +309,8 @@ def cong_lenh_tai_lieu(goc):
             if cong_cu.startswith(("npm", "yarn", "make", "go", "cargo")):
                 continue
             if not re.search(r"\.(py|js|mjs|ts|sh)$", muc):
+                continue
+            if bi_bo_qua(muc.replace("\\", "/").rstrip("/"), bo_dich):
                 continue
             if not os.path.exists(os.path.join(goc, muc)):
                 hong.append("%s  ->  %s %s" % (ngan(goc, f), cong_cu, muc))
@@ -384,7 +401,7 @@ cong_bi_mat.pha = lambda g: _pha_them(
 def cong_vong_doi(goc):
     """File danh dau da bo con duoc tai lieu dang dung tro toi khong."""
     ra = []
-    bo, tep_bo = nap_bo_qua(goc)
+    bo, bo_dich, tep_bo = nap_bo_qua(goc)
     da_bo = {}
     for f in moi_file(goc):
         if bi_bo_qua(ngan(goc, f), bo):
