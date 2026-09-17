@@ -11,6 +11,7 @@ cd <thu-muc-du-an>
 python kit/cong.py                                     # kiểm
 python kit/cong.py --tu-kiem                           # kiểm CHÍNH CÁC PHÉP KIỂM
 python kit/cong.py --tiep                              # đang ở đâu, sắp làm gì
+python kit/cong.py --ha-tang                           # máy này có đủ công cụ không
 ```
 
 `--tiep` là câu trả lời cho một chữ **"tiếp"**: nó đọc dãy giai đoạn, mục *việc tiếp theo* của file
@@ -108,11 +109,12 @@ phép thử viết sai**, không phải cổng hỏng. Cách giải thích dễ 
 | **Nhật ký còn được ghi** | Nhật ký trỏ tới hồ sơ đã mất; hoặc kho chạy tiếp **10 commit** mà không ai ghi thêm dòng nào | Mục nhật ký đó đúng, hay có ích |
 | **Việc tiếp theo còn đúng giai đoạn** | Mục *việc tiếp theo* của `STATE.md` **không còn gọi tên** giai đoạn đang làm — phần nhìn về phía trước đã chết mà vẫn đọc lên như một kế hoạch | Những việc kể trong đó **đang** làm, hay đủ, hay xếp đúng thứ tự |
 | **Việc lặp lại đã được gọi lại** | Một việc ghi **từ 3 lần trở lên** trong `LAP-LAI.md` mà ô *gọi thành* còn bỏ trống, hoặc chỉ ghi *"chưa"* | Bạn đã ghi **đủ** những việc đang lặp — việc làm năm lần mà không ai ghi vào đó thì nó không thấy |
+| **Hạ tầng dự án dùng được trên máy này** *(`--ha-tang`)* | Một công cụ đã khai báo **không chạy được** trên máy đang chạy — thiếu nó thì không làm được việc, dù mọi file trong kho đều đủ | Tài khoản phía sau công cụ đó còn quyền hay còn hạn. `wrangler --version` trả lời **không** nghĩa là bạn deploy được |
 | **Bản trong kho khớp bản đã công bố** *(`--ngoai`)* | File đã khai báo **lệch** với bản đang nằm ở URL tương ứng; hoặc không tải được bản đó | Bạn đã khai báo **đủ** file được công bố |
 | **Tên miền còn hạn** *(`--ngoai`)* | Tên miền đã khai báo còn **≤ 60 ngày** là hết hạn; hoặc **không tra được hạn** | Thẻ thanh toán gia hạn còn sống. Nó đọc sổ đăng ký, không đọc ví bạn |
 | **Phụ thuộc ngoài còn sống** *(`--ngoai`)* | URL đã khai báo mà chết | Nội dung sau URL còn đúng |
 
-Cổng cuối cần mạng nên **tuỳ chọn** — để `python kit/cong.py` chạy được cả lúc không có Internet.
+Ba cổng cuối cần mạng nên **tuỳ chọn** — để `python kit/cong.py` chạy được cả lúc không có Internet. Cổng **hạ tầng** cũng tuỳ chọn, vì lý do khác: nó **chạy lệnh lấy từ một file trong kho**, nên phải được bật bằng tay, và nó in từng lệnh ra trước khi chạy.
 
 ---
 

@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.11.0"
+PHIEN_BAN = "1.12.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -230,6 +230,15 @@ cong chay duoc khong can mang; roi in ra dang o dau, sap lam gi, cai gi dang
 chan. No THOAT 1 chu khong doan: hai giai doan cung dang lam, hoac khong cho
 nao ghi viec sap lam, thi mot chu "tiep" khong tro vao dau ca — va mot cau
 doan nghe cho xuoi con te hon mot loi tu choi.
+
+Tren mot may moi — may khac, nguoi khac, hay chinh may nay sau khi cai lai —
+chay them:
+
+    python kit/cong.py --ha-tang
+
+No CHAY THAT tung lenh khai trong phu-thuoc-ngoai.txt de xem may nay co du
+cong cu lam viec khong. Thieu mot cai thi moi file trong kho van du, va van
+khong lam duoc gi.
 
 Cau de dan vao mot cua so chat moi, thay cho chu "tiep":
 
@@ -875,6 +884,18 @@ PHU_THUOC = """# Phu thuoc ngoai — thu du an nay dua vao ma nam ngoai tam tay
 #
 # Moi dong: <url><hai dau cach><vai tro cua no>
 # Dong bat dau bang # la ghi chu.
+#
+# Ngoai dong URL, file nay con nhan ba dang dong khac, moi dang mot cong doc:
+#   ten-mien <ten mien>            — han dang ky, doc qua RDAP     (--ngoai)
+#   ban-sao  <duong dan>  <url>    — ban trong kho vs ban da cong bo (--ngoai)
+#   ha-tang  <ten>  <lenh>         — cong cu phai dung duoc tren may (--ha-tang)
+#
+# Dong ha-tang xep theo THU TU DUNG LEN: cai o tren can co truoc. Vi du:
+#   ha-tang git  git --version
+#
+# Vi sao ha-tang la mot LENH chu khong phai mot o de dien: mot o doi phai co
+# "cach dung lai" se duoc dien bang mot cau nghe cho xuoi, va khong ai biet
+# cau do con dung khong. Mot lenh thi hoac thoat 0 hoac khong.
 #
 # Vi sao co file nay: cai gi khong cong nao nhin toi thi khi no chet, moi cong
 # trong nha van xanh het. Do dung la kieu hong im lang.

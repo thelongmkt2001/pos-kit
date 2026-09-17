@@ -3,6 +3,7 @@
 
     python kit/cong.py              chay het cac cong
     python kit/cong.py --ngoai      chay them cong goi ra Internet
+    python kit/cong.py --ha-tang    chay them cong GOI LENH kiem cong cu
     python kit/cong.py --tu-kiem    CHUNG MINH tung cong co the truot
     python kit/cong.py --tiep       "tiep" nghia la gi: dang o dau, sap lam gi
 
@@ -44,7 +45,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.11.0"
+PHIEN_BAN = "1.12.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2184,6 +2185,86 @@ def _pha_lap_lai(goc):
 cong_lap_lai.pha = _pha_lap_lai
 
 
+# Dong khai bao ha tang, moi dong: ha-tang <ten><2 dau cach><lenh chung minh>
+TIEN_TO_HA_TANG = "ha-tang "
+GIAY_CHO_LENH = 60
+
+
+def cong_ha_tang(goc):
+    """Thu can co de lam duoc viec o day — kiem bang cach CHAY, khong bang doc.
+
+    Thu tu cac dong cung la thu tu dung len: cai o tren can co truoc.
+
+    Cong nay chay lenh lay tu mot file trong kho. Do la ly do no mac dinh bi bo
+    qua va phai bat bang tay — va la ly do no in tung lenh ra truoc khi chay.
+    """
+    import subprocess
+    ra = []
+    f = tim_tep(goc, TEP_PHU_THUOC, "docs/" + TEP_PHU_THUOC)
+    cap = []
+    if f:
+        for d in doc(f).splitlines():
+            d = d.strip()
+            if d.lower().startswith(TIEN_TO_HA_TANG):
+                phan = re.split(r"\s{2,}|\t",
+                                d[len(TIEN_TO_HA_TANG):].strip(), 1)
+                if len(phan) == 2:
+                    cap.append((phan[0].strip(), phan[1].strip()))
+    if not cap:
+        ra.append(("--", "Khong khai bao ha tang nao — bo qua cong nay"))
+        ra.append(("  ", "Can no lan dau ban dung du an nay tren mot may khac."))
+        ra.append(("  ", "Khai bao trong %s, moi dong mot thu, XEP THEO THU TU"
+                   % TEP_PHU_THUOC))
+        ra.append(("  ", "phai dung len truoc:"))
+        ra.append(("  ", "  ha-tang git<hai dau cach>git --version"))
+        return 0, ra
+
+    hong = 0
+    for ten, lenh in cap:
+        ra.append(("  ", "  $ %s" % lenh[:64]))
+        try:
+            p = subprocess.run(lenh, shell=True, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               timeout=GIAY_CHO_LENH)
+            ma = p.returncode
+            loi = ""
+        except subprocess.TimeoutExpired:
+            ma, loi = 1, "qua %d giay" % GIAY_CHO_LENH
+        except Exception as e:
+            ma, loi = 1, type(e).__name__
+        if ma == 0:
+            ra.append(("ok", "%-28s dung duoc" % ten))
+        else:
+            ra.append(("HONG", "%-28s KHONG dung duoc %s" % (ten, loi)))
+            hong += 1
+    if hong:
+        ra.append(("   ", "Thieu mot thu trong day nay thi may nay khong lam"))
+        ra.append(("   ", "duoc viec cua du an — du moi file trong kho deu du."))
+    return (1 if hong else 0), ra
+
+
+cong_ha_tang.mo_ta = "Ha tang du an dung duoc tren may nay"
+cong_ha_tang.can_lenh = True
+cong_ha_tang.chung_minh = "tung lenh DA KHAI BAO chay xong va thoat 0 tren chinh may dang chay"
+cong_ha_tang.khong_chung_minh = "tai khoan phia sau cong cu do con song, con quyen, hay con han. `wrangler --version` tra loi khong co nghia la ban deploy duoc. Va no chi biet nhung thu BAN DA KHAI — cai ban quen khai thi no khong thay."
+
+
+def _pha_ha_tang(goc):
+    """Gieo mot dong ha-tang tro toi mot lenh khong he ton tai."""
+    dong = (NL + "ha-tang cong cu khong he ton tai  "
+            "lenh-khong-he-ton-tai-9k2x --version" + NL)
+    for ten in (TEP_PHU_THUOC, os.path.join("docs", TEP_PHU_THUOC)):
+        duong = os.path.join(goc, ten)
+        if os.path.exists(duong):
+            io.open(duong, "a", encoding="utf-8", newline="").write(dong)
+            return
+    io.open(os.path.join(goc, TEP_PHU_THUOC), "w", encoding="utf-8",
+            newline="").write(dong)
+
+
+cong_ha_tang.pha = _pha_ha_tang
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -2206,6 +2287,7 @@ CAC_CONG = [
     cong_phu_thuoc,
     cong_ten_mien,
     cong_ban_sao,
+    cong_ha_tang,
 ]
 
 
@@ -2283,7 +2365,7 @@ def _giai_tiep(goc):
     ra.append(("", "== CO GI DANG CHAN KHONG =="))
     do = []
     for c in CAC_CONG:
-        if getattr(c, "can_mang", False):
+        if getattr(c, "can_mang", False) or getattr(c, "can_lenh", False):
             continue
         try:
             ma, _ = c(goc)
@@ -2299,8 +2381,8 @@ def _giai_tiep(goc):
             ra.append((" ", "  - " + x))
     else:
         ra.append((" ", "  Cac cong chay khong can mang deu khong bao hong."))
-        ra.append((" ", "  Cong can mang chua chay o day: python kit/cong.py"
-                   " --ngoai"))
+        ra.append((" ", "  Chua chay o day: python kit/cong.py --ngoai"
+                   " --ha-tang"))
 
     # ---- cau de mo phien moi
     ra.append(("", ""))
@@ -2334,13 +2416,18 @@ def tiep():
 
 
 # ======================================================================== chay
-def chay_het(goc, co_mang=False, im=False):
+def chay_het(goc, co_mang=False, im=False, co_lenh=False):
     tong = 0
     for c in CAC_CONG:
         if getattr(c, "can_mang", False) and not co_mang:
             if not im:
                 print()
                 print("  [ bo qua ] %s  (can mang: them --ngoai)" % c.mo_ta)
+            continue
+        if getattr(c, "can_lenh", False) and not co_lenh:
+            if not im:
+                print()
+                print("  [ bo qua ] %s  (chay lenh: them --ha-tang)" % c.mo_ta)
             continue
         ma, dong = c(goc)
         tong = max(tong, ma)
@@ -2357,6 +2444,7 @@ def chay_het(goc, co_mang=False, im=False):
 
 def main():
     co_mang = "--ngoai" in sys.argv
+    co_lenh = "--ha-tang" in sys.argv
     goc = GOC
     print()
     print("  " + "=" * 68)
@@ -2364,7 +2452,7 @@ def main():
     print("  Thu muc: %s" % goc)
     print("  " + "=" * 68)
 
-    ma = chay_het(goc, co_mang)
+    ma = chay_het(goc, co_mang, co_lenh=co_lenh)
 
     print()
     print("  " + "-" * 68)
@@ -2390,6 +2478,7 @@ def tu_kiem():
     Du an that khong bao gio bi sua.
     """
     co_mang = "--ngoai" in sys.argv
+    co_lenh = "--ha-tang" in sys.argv
     print()
     print("  " + "=" * 68)
     print("  tu-kiem — moi cong co THAT SU truot duoc khong?")
@@ -2407,6 +2496,11 @@ def tu_kiem():
             if getattr(c, "can_mang", False) and not co_mang:
                 print()
                 print("  BO QUA  %-34s (can mang: them --ngoai)" % c.mo_ta)
+                bo += 1
+                continue
+            if getattr(c, "can_lenh", False) and not co_lenh:
+                print()
+                print("  BO QUA  %-34s (chay lenh: them --ha-tang)" % c.mo_ta)
                 bo += 1
                 continue
 
