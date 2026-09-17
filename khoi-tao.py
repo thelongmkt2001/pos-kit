@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.15.0"
+PHIEN_BAN = "1.16.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -251,6 +251,10 @@ cong chay duoc khong can mang; roi in ra dang o dau, sap lam gi, cai gi dang
 chan. No THOAT 1 chu khong doan: hai giai doan cung dang lam, hoac khong cho
 nao ghi viec sap lam, thi mot chu "tiep" khong tro vao dau ca — va mot cau
 doan nghe cho xuoi con te hon mot loi tu choi.
+
+Kho nay da nhan bo kit, nen ca 22 cong deu co cho de nhin. Tren mot kho CHUA
+nhan kit thi chay `python cong.py --kho`: no chi chay 5 cong nhin kho nhu no
+dang la, va 17 cong con lai im lang — im o do KHONG phai la dat.
 
 Tren mot may moi — may khac, nguoi khac, hay chinh may nay sau khi cai lai —
 chay them:

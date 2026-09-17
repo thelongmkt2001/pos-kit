@@ -14,6 +14,35 @@ python kit/cong.py --tiep                              # đang ở đâu, sắp 
 python kit/cong.py --ha-tang                           # máy này có đủ công cụ không
 ```
 
+---
+
+## Đã có sẵn một dự án đang chạy? Bắt đầu từ đây
+
+Chép **một file** `cong.py` vào kho của bạn rồi chạy:
+
+```bash
+python cong.py --kho
+```
+
+`--kho` chỉ chạy **5 cổng nhìn kho như nó đang là** — chúng không cần bạn tạo file nào trước:
+
+| Cổng | Nó hỏi gì |
+|---|---|
+| **File trạng thái còn sống** | Phiên sau mở kho này ra thì đọc ở đâu để biết đang ở đâu? |
+| **Lệnh trong tài liệu chạy được** | Lệnh trong `README` có trỏ tới file có thật không? |
+| **Bí mật không nằm trong repo** | Có hình dạng khoá/token nào nằm trong file đang theo dõi không? |
+| **Chỗ dựa được ghi ra** | Kho này gọi ra ngoài những đâu, và có ai ghi lại không? |
+| **Quy ước tới được cả hai loại công cụ** | `AGENTS.md` và `CLAUDE.md` — thiếu một cái thì một nửa số công cụ **không thấy gì và cũng không báo lỗi** |
+
+**17 cổng còn lại canh hồ sơ do chính bộ kit sinh ra.** Trên một kho chưa nhận kit, chúng im lặng —
+và im lặng ở đó **không phải là đạt**, nó là *"không có gì để xem"*.
+
+> 📌 Con số 5/17 không phải ý kiến. Đo ngày **2026-09-17** trên hai kho thật, không phải kho sinh ra
+> bộ kit — một kho 1.800 file, một kho 283 file. Kết quả giống hệt nhau: **13 trên 18** cổng thật sự
+> chạy là im lặng. Ba cổng kêu đúng ở cả hai kho; ba cổng kêu nhầm, đã sửa.
+
+Chạy `--kho` trước. Thấy nó chỉ đúng chỗ thì mới tính tới việc dựng hồ sơ.
+
 `--tiep` là câu trả lời cho một chữ **"tiếp"**: nó đọc dãy giai đoạn, mục *việc tiếp theo* của file
 trạng thái và toàn bộ cổng chạy không cần mạng, rồi in ra đang ở đâu · sắp làm gì · cái gì đang
 chặn. Nó **thoát 1 chứ không đoán** — hai giai đoạn cùng đang làm, hoặc không chỗ nào ghi việc sắp

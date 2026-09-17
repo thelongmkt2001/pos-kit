@@ -4,6 +4,8 @@
     python kit/cong.py              chay het cac cong
     python kit/cong.py --ngoai      chay them cong goi ra Internet
     python kit/cong.py --ha-tang    chay them cong GOI LENH kiem cong cu
+    python kit/cong.py --kho        CHI chay cac cong nhin kho nhu no dang la
+                                    — dung duoc tren mot kho chua nhan bo kit
     python kit/cong.py --tu-kiem    CHUNG MINH tung cong co the truot
     python kit/cong.py --tiep       "tiep" nghia la gi: dang o dau, sap lam gi
 
@@ -45,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.15.0"
+PHIEN_BAN = "1.16.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -203,6 +205,7 @@ def cong_trang_thai(goc):
     return 0, ra
 
 
+cong_trang_thai.nhin_kho = True
 cong_trang_thai.mo_ta = "File trang thai con song"
 cong_trang_thai.chung_minh = "co file trang thai, va no khong tut lai qua xa so voi commit"
 cong_trang_thai.khong_chung_minh = "NOI DUNG trong do con dung. May khong doc duoc y nghia."
@@ -356,6 +359,7 @@ def cong_lenh_tai_lieu(goc):
     return 1, ra
 
 
+cong_lenh_tai_lieu.nhin_kho = True
 cong_lenh_tai_lieu.mo_ta = "Lenh trong tai lieu chay duoc"
 cong_lenh_tai_lieu.chung_minh = "file ma lenh tro toi co ton tai"
 cong_lenh_tai_lieu.khong_chung_minh = "lenh do CHAY duoc, hay chay ra ket qua dung. No chi kiem su ton tai."
@@ -458,6 +462,7 @@ def cong_bi_mat(goc):
     return 0, ra
 
 
+cong_bi_mat.nhin_kho = True
 cong_bi_mat.mo_ta = "Bi mat khong nam trong repo"
 cong_bi_mat.chung_minh = "khong co chuoi nao KHOP CAC MAU DA BIET trong file dang theo doi"
 cong_bi_mat.khong_chung_minh = "repo khong co bi mat. No tim theo HINH DANG; mot bi mat dat ten la `cau_hinh_3` thi no khong thay. Va no chi nhin file, khong nhin LICH SU git."
@@ -882,6 +887,7 @@ def cong_cho_dua(goc):
     return 0, ra
 
 
+cong_cho_dua.nhin_kho = True
 cong_cho_dua.mo_ta = "Cho dua duoc ghi ra"
 cong_cho_dua.chung_minh = "khi co dau vet cho dua ben ngoai, co mot danh sach da ghi it nhat mot dong"
 cong_cho_dua.khong_chung_minh = "danh sach do DU, hay DUNG. Thu ban quen thi phep kiem nay cung khong biet la ban quen."
@@ -1253,6 +1259,7 @@ def cong_quy_uoc(goc):
     return 0, ra
 
 
+cong_quy_uoc.nhin_kho = True
 cong_quy_uoc.mo_ta = "Quy uoc toi duoc ca hai loai cong cu"
 cong_quy_uoc.chung_minh = "ca %s deu co, chi mot ban mang noi dung, ban kia goi ten no" % " va ".join(CAP_QUY_UOC)
 cong_quy_uoc.khong_chung_minh = "cong cu CO DOC file do that khong, hay co lam theo khong. Mot luat khong duoc doc va mot luat khong co tac dung cho ra cung mot quan sat — cong nay chi chan duoc ve thu nhat."
@@ -2622,9 +2629,11 @@ def tiep():
 
 
 # ======================================================================== chay
-def chay_het(goc, co_mang=False, im=False, co_lenh=False):
+def chay_het(goc, co_mang=False, im=False, co_lenh=False, chi_kho=False):
     tong = 0
     for c in CAC_CONG:
+        if chi_kho and not getattr(c, "nhin_kho", False):
+            continue
         if getattr(c, "can_mang", False) and not co_mang:
             if not im:
                 print()
@@ -2651,14 +2660,16 @@ def chay_het(goc, co_mang=False, im=False, co_lenh=False):
 def main():
     co_mang = "--ngoai" in sys.argv
     co_lenh = "--ha-tang" in sys.argv
+    chi_kho = "--kho" in sys.argv
     goc = GOC
     print()
     print("  " + "=" * 68)
-    print("  cong.py %s — kiem mot du an chay bang AI" % PHIEN_BAN)
+    print("  cong.py %s — kiem mot du an chay bang AI%s"
+          % (PHIEN_BAN, " (chi cac cong NHIN KHO)" if chi_kho else ""))
     print("  Thu muc: %s" % goc)
     print("  " + "=" * 68)
 
-    ma = chay_het(goc, co_mang, co_lenh=co_lenh)
+    ma = chay_het(goc, co_mang, co_lenh=co_lenh, chi_kho=chi_kho)
 
     print()
     print("  " + "-" * 68)
@@ -2668,6 +2679,21 @@ def main():
         print("  Moi cong da chay deu khong bao hong.")
         print("  Day KHONG phai 'du an nay dung'. Moi cong chi nhin dung mot thu,")
         print("  va tung cong da tu khai no khong nhin thay gi.")
+    if not chi_kho:
+        so_kho = sum(1 for c in CAC_CONG if getattr(c, "nhin_kho", False))
+        print()
+        print("  Hai loai cong, va chung tra loi hai cau khac nhau:")
+        print("    %2d cong NHIN KHO NHU NO DANG LA — chay duoc tren bat ky kho"
+              % so_kho)
+        print("       nao, ke ca kho chua bao gio nghe ten bo kit nay.")
+        print("    %2d cong CANH HO SO do chinh bo kit sinh ra — tren mot kho"
+              % (len(CAC_CONG) - so_kho))
+        print("       chua nhan kit, chung do 'da nhan kit chua', khong do kho do.")
+        print("  Con so do khong phai y kien: do ngay 2026-09-17 tren hai kho")
+        print("  that, 13/18 cong that su chay la im lang.")
+        print("      python %s --kho     chi chay %d cong loai dau"
+              % (os.path.basename(__file__), so_kho))
+
     print()
     print("  Muon biet cac cong nay co THAT SU truot duoc khong:")
     print("      python %s --tu-kiem" % os.path.basename(__file__))
