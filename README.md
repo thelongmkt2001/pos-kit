@@ -10,7 +10,13 @@ python pos-kit/khoi-tao.py <thu-muc-du-an> --day-du    # dựng bộ tối thi�
 cd <thu-muc-du-an>
 python kit/cong.py                                     # kiểm
 python kit/cong.py --tu-kiem                           # kiểm CHÍNH CÁC PHÉP KIỂM
+python kit/cong.py --tiep                              # đang ở đâu, sắp làm gì
 ```
+
+`--tiep` là câu trả lời cho một chữ **"tiếp"**: nó đọc dãy giai đoạn, mục *việc tiếp theo* của file
+trạng thái và toàn bộ cổng chạy không cần mạng, rồi in ra đang ở đâu · sắp làm gì · cái gì đang
+chặn. Nó **thoát 1 chứ không đoán** — hai giai đoạn cùng đang làm, hoặc không chỗ nào ghi việc sắp
+làm, thì một chữ *"tiếp"* không trỏ vào đâu cả.
 
 `khoi-tao.py` tự chép `cong.py` vào dự án mới, nên sau bước đầu bạn không cần kho này nữa.
 

@@ -4,6 +4,7 @@
     python kit/cong.py              chay het cac cong
     python kit/cong.py --ngoai      chay them cong goi ra Internet
     python kit/cong.py --tu-kiem    CHUNG MINH tung cong co the truot
+    python kit/cong.py --tiep       "tiep" nghia la gi: dang o dau, sap lam gi
 
 MOT FILE, KHONG CAI DAT GI. Chep file nay vao du an cua ban la chay duoc.
 
@@ -43,7 +44,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.10.1"
+PHIEN_BAN = "1.11.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -1992,18 +1993,34 @@ TIEU_DE_VIEC_TIEP = ("viec tiep theo", "next", "viec ke tiep")
 
 
 def _muc_theo_tieu_de(t, ten_chuan):
-    """Tra ve than cua muc "## ..." dau tien co tieu de khop, hoac None."""
-    ra, dang, ten = [], False, None
-    for d in t.splitlines():
-        if d.startswith("## "):
-            if dang:
+    """Than cua muc co tieu de khop — SAU NHAT trong cac muc khop, hoac None.
+
+    Nhan ca "## " lan "### ". Vi sao lay cai sau nhat: mot muc ngoai co the
+    chua mot muc con cung ten, va phan dau cua muc ngoai thuong la doan giai
+    thich. Lay muc ngoai thi doan giai thich do — la lich su — se duoc doc nhu
+    la viec sap lam. Do duoc ngay 2026-09-17 tren chinh kho nay.
+    """
+    dong = t.splitlines()
+    dau = []
+    for i, d in enumerate(dong):
+        for muc in (3, 2):           # "### " truoc, roi "## "
+            mo = "#" * muc + " "
+            if d.startswith(mo) and not d.startswith(mo + "#"):
+                ten = khong_dau(d[len(mo):]).strip()
+                if any(ten.startswith(x) for x in ten_chuan):
+                    dau.append((i, muc))
                 break
-            ten = khong_dau(d[3:]).strip()
-            dang = any(ten.startswith(x) for x in ten_chuan)
-            continue
-        if dang:
-            ra.append(d)
-    return NL.join(ra).strip() if dang or ra else None
+    if not dau:
+        return None
+    i, muc = dau[-1]
+    ra = []
+    for d in dong[i + 1:]:
+        if d.startswith("#"):
+            bac = len(d) - len(d.lstrip("#"))
+            if bac <= muc and d[bac:bac + 1] == " ":
+                break
+        ra.append(d)
+    return NL.join(ra).strip()
 
 
 def cong_viec_tiep(goc):
@@ -2192,6 +2209,130 @@ CAC_CONG = [
 ]
 
 
+# ======================================================================== tiep
+# Cau de dan vao mot cua so chat moi, thay cho chu "tiep". Ngan, va khong dua
+# vao tri nho hoi thoai — cua so moi thi tri nho do bang khong.
+CAU_MO_PHIEN = (
+    "Chay `python kit/cong.py --tiep` trong kho nay, doc ket qua, roi lam tiep"
+    " dung viec no chi ra. Dung dua vao tri nho chat; kho la tri nho."
+)
+
+
+def _giai_tiep(goc):
+    """Tra ve (ma thoat, cac dong) — dang o dau, sap lam gi, cai gi dang chan."""
+    ra = []
+    fg = tim_tep(goc, "GIAI-DOAN.md", "docs/GIAI-DOAN.md")
+    fs = tim_tep(goc, "STATE.md", "docs/STATE.md", "TRANG-THAI.md")
+
+    # ---- dang o dau
+    ra.append(("", "== DANG O DAU =="))
+    if not fg:
+        ra.append(("!", "Khong co day giai doan. Chua co gi de noi 'tiep' vao."))
+        ra.append((" ", "  python kit/khoi-tao.py ."))
+        return 1, ra
+
+    muc = [(k, v) for k, v in _muc_truong(doc(fg))
+           if not k.startswith("<") and v]
+    dem = {x: 0 for x in TRANG_THAI_GIAI_DOAN}
+    dang_lam = []
+    for ten, tr in muc:
+        x = khop_ten(tr.get("trang thai", ""), TRANG_THAI_GIAI_DOAN)
+        if x:
+            dem[x] += 1
+        if x == "dang lam":
+            dang_lam.append((ten, tr))
+    ra.append((" ", "  %s: %d xong / %d dang lam / %d chua toi"
+               % (ngan(goc, fg), dem["xong"], dem["dang lam"],
+                  dem["chua toi"])))
+
+    if len(dang_lam) != 1:
+        ra.append(("!", "Co %d giai doan 'dang lam'. Phai co dung mot."
+                   % len(dang_lam)))
+        ra.append((" ", "  Khong mot thi 'tiep' tro vao cho nao cung duoc, va"))
+        ra.append((" ", "  lan nao cung ra mot cho khac."))
+        return 1, ra
+
+    ten, tr = dang_lam[0]
+    ra.append((" ", "  Giai doan: %s" % ten[:60]))
+    thoat = tr.get("thoat khi", "")
+    if _da_tra_loi(thoat):
+        ra.append((" ", "  Thoat khi: %s" % _bo_xuong_dong(thoat)[:60]))
+    else:
+        ra.append(("!", "  Giai doan nay chua co dieu kien thoat do duoc."))
+
+    # ---- sap lam gi
+    ra.append(("", ""))
+    ra.append(("", "== VIEC KE TIEP =="))
+    than = _muc_theo_tieu_de(doc(fs), TIEU_DE_VIEC_TIEP) if fs else None
+    if not than or than.startswith("<"):
+        ra.append(("!", "File trang thai khong ke ra viec sap lam."))
+        ra.append((" ", "  Them mot muc '## Viec tiep theo' vao %s."
+                   % (ngan(goc, fs) if fs else "file trang thai")))
+        ra.append((" ", "  Khong co no thi 'tiep' khong giai ra duoc gi — va"))
+        ra.append((" ", "  doan bua thi nghe van xuoi."))
+        return 1, ra
+    dong = [d.rstrip() for d in than.splitlines() if d.strip()]
+    for d in dong[:14]:
+        ra.append((" ", "  " + d[:74]))
+    if len(dong) > 14:
+        ra.append((" ", "  ... con %d dong, doc %s"
+                   % (len(dong) - 14, ngan(goc, fs))))
+
+    # ---- cai gi dang chan
+    ra.append(("", ""))
+    ra.append(("", "== CO GI DANG CHAN KHONG =="))
+    do = []
+    for c in CAC_CONG:
+        if getattr(c, "can_mang", False):
+            continue
+        try:
+            ma, _ = c(goc)
+        except Exception as e:
+            do.append("%s (cong nay loi: %s)" % (c.mo_ta, type(e).__name__))
+            continue
+        if ma:
+            do.append(c.mo_ta)
+    if do:
+        ra.append(("!", "%d cong dang bao hong — sua truoc khi lam viec moi:"
+                   % len(do)))
+        for x in do:
+            ra.append((" ", "  - " + x))
+    else:
+        ra.append((" ", "  Cac cong chay khong can mang deu khong bao hong."))
+        ra.append((" ", "  Cong can mang chua chay o day: python kit/cong.py"
+                   " --ngoai"))
+
+    # ---- cau de mo phien moi
+    ra.append(("", ""))
+    ra.append(("", "== DAN CAU NAY VAO MOT CHAT MOI =="))
+    ra.append((" ", "  " + CAU_MO_PHIEN))
+    return 0, ra
+
+
+def tiep():
+    goc = GOC
+    print()
+    print("  " + "=" * 68)
+    print("  cong.py %s — 'tiep' nghia la gi o kho nay" % PHIEN_BAN)
+    print("  Thu muc: %s" % goc)
+    print("  " + "=" * 68)
+    print()
+    ma, dong = _giai_tiep(goc)
+    for nhan, noi in dong:
+        print("  %-1s %s" % (nhan, noi) if nhan else "  %s" % noi)
+    print()
+    print("  " + "-" * 68)
+    if ma:
+        print("  KHONG giai duoc chu 'tiep'. Doc cac dong co dau ! o tren.")
+        print("  Mot chu 'tiep' giai ra con so khong phai cau tra loi — no chi")
+        print("  doc len giong mot cau tra loi.")
+    else:
+        print("  Cho nay KHONG chung minh viec ke tiep la viec DUNG nen lam.")
+        print("  No doc hai file va cac cong. Thu tu uu tien la cua nguoi.")
+    print("  " + "-" * 68)
+    return ma
+
+
 # ======================================================================== chay
 def chay_het(goc, co_mang=False, im=False):
     tong = 0
@@ -2236,6 +2377,8 @@ def main():
     print()
     print("  Muon biet cac cong nay co THAT SU truot duoc khong:")
     print("      python %s --tu-kiem" % os.path.basename(__file__))
+    print("  Quen dang lam gi, hoac vua mo mot cua so chat moi:")
+    print("      python %s --tiep" % os.path.basename(__file__))
     print("  " + "-" * 68)
     return ma
 
@@ -2326,4 +2469,9 @@ def tu_kiem():
 
 
 if __name__ == "__main__":
-    sys.exit(tu_kiem() if "--tu-kiem" in sys.argv else main())
+    if "--tu-kiem" in sys.argv:
+        sys.exit(tu_kiem())
+    elif "--tiep" in sys.argv:
+        sys.exit(tiep())
+    else:
+        sys.exit(main())
