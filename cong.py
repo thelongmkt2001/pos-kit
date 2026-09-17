@@ -45,7 +45,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.14.0"
+PHIEN_BAN = "1.15.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -120,6 +120,23 @@ def ngan(goc, f):
     return os.path.relpath(f, goc).replace("\\", "/")
 
 
+# Thu muc cua CONG CU, khong phai ho so cua du an. tim_tep() do theo TEN FILE,
+# nen khong chan thi no di lac vao day: do duoc 2026-09-17 tren kho
+# autonomous-ai-binance-futures, hai cong khac nhau cung bat nham —
+# .claude/commands/trang-thai.md bi doc nhu file trang thai, va
+# .claude/rules/rui-ro.md bi doc nhu so rui ro. Mot nguyen nhan, hai cong.
+THU_MUC_CONG_CU = (".claude/", ".github/", ".vscode/", ".cursor/", ".idea/")
+
+
+def bi_bo_qua_may(duong):
+    """Duong dan nay thuoc thu muc cau hinh cong cu, khong phai ho so du an."""
+    d = duong.replace("\\", "/")
+    if d.startswith("./"):
+        d = d[2:]
+    return any(d.startswith(x) or ("/" + x) in d
+               for x in THU_MUC_CONG_CU)
+
+
 def tim_tep(goc, *ten):
     """Tra ve duong dan dau tien tim thay trong cac ten duoc dua vao."""
     for t in ten:
@@ -127,6 +144,8 @@ def tim_tep(goc, *ten):
         if os.path.exists(p):
             return p
     for f in moi_file(goc):
+        if bi_bo_qua_may(ngan(goc, f)):
+            continue
         if os.path.basename(f).lower() in {x.lower() for x in ten}:
             return f
     return None
@@ -346,8 +365,41 @@ cong_lenh_tai_lieu.pha = lambda g: _pha_them(
 
 
 # ======================================================================= cong 4
+# Nhung gia tri KHONG phai bi mat, do duoc tren hai kho that ngay 2026-09-17.
+# Loc theo hinh dang CUA GIA TRI. Khong loai tru theo thu muc: bo qua moi file
+# ten test_* thi mot bi mat that nam trong do se im mai mai.
+CHU_GIU_CHO = ("placeholder", "your_", "your-", "changeme", "change_me",
+               "example", "sample", "dummy", "fake", "test", "xxxx", "todo",
+               "redacted", "<", "{", "$")
+
+
+def _co_ve_that(gia_tri):
+    """Gia tri bat duoc co the la mot bi mat that khong.
+
+    Ba loai bi loai, moi loai do duoc tren kho that:
+      - trong gia tri co ma: `; ` hay `)` — do la nhan nhac printf hoac mot
+        khang dinh phu dinh, khong phai mot gia tri;
+      - gia tri la cho giu cho: your_..., {secret}, control-test;
+      - gia tri lap mot ky tu — token gia kieu "AAAAAAAAAAAA".
+    """
+    v = gia_tri.strip()
+    if not v or len(v) < 6:
+        return False
+    if ";" in v or ")" in v or v.startswith(" "):
+        return False
+    t = v.lower()
+    if any(x in t for x in CHU_GIU_CHO):
+        return False
+    lap = 1
+    dai_nhat = 1
+    for i in range(1, len(v)):
+        lap = lap + 1 if v[i] == v[i - 1] else 1
+        dai_nhat = max(dai_nhat, lap)
+    return dai_nhat < 8
+
+
 HINH_DANG_BI_MAT = [
-    (r"(?i)\b(password|passwd|secret|token|api[_-]?key|private[_-]?key)\b\s*[:=]\s*['\"][^'\"]{6,}",
+    (r"(?i)\b(password|passwd|secret|token|api[_-]?key|private[_-]?key)\b\s*[:=]\s*['\"](?P<gt>[^'\"]{6,})",
      "gan gia tri cho mot ten nghe nhu bi mat"),
     (r"\b(sk|pk)-[A-Za-z0-9]{16,}", "khoa dang sk-/pk-"),
     (r"\bAKIA[0-9A-Z]{12,}", "khoa AWS"),
@@ -380,6 +432,12 @@ def cong_bi_mat(goc):
         t = doc(f)
         for mau, ten in HINH_DANG_BI_MAT:
             for m in re.finditer(mau, t):
+                # Mau thu nhat bat theo TEN BIEN, nen no bat ca ma shell
+                # lan cho giu cho. Loc theo hinh dang GIA TRI. Bon mau con
+                # lai la hinh dang rieng cua khoa that — khong loc.
+                if m.re.groupindex.get("gt") and not _co_ve_that(
+                        m.group("gt")):
+                    continue
                 d = t[:m.start()].count("\n") + 1
                 thay.append("%s:%d  %s" % (ngan(goc, f), d, ten))
 
