@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.12.0"
+PHIEN_BAN = "1.13.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -144,7 +144,12 @@ mot lan sua tay khong ghi lai la mot phien ban khong ton tai o dau ca.>
 
 ## Viec tiep theo
 
-<Mot viec. Neu liet ke bay viec thi khong ai biet lam cai nao truoc.>
+VIEC:    <MOT viec. Liet ke bay viec thi khong ai biet lam cai nao truoc.>
+CHO AI:  <toi lam / cho ai do chot — ghi ro ten>
+
+<Muon ke them boi canh thi viet o duoi. Nhung hai dong tren phai luon co: mot
+muc dai va doc rat xuoi van co the khong ke ra viec nao — vi du khi moi dong
+trong do deu da "Xong". Cong doc HAI DONG TREN, khong doc doan van.>
 
 ## Dang chay the nao
 
@@ -793,7 +798,7 @@ Khong phai danh sach cong cu — la danh sach CHO DUA:
 VIEC = """# <ten viec, mot cau>
 
 > Dien TRUOC khi go chu dau tien. To giay nay di het mot viec tu dau den cuoi.
-> Viec xong thi o 5 di vao STATE / QUYET-DINH, con to nay thanh ho so.
+> Viec xong thi o 6 di vao STATE / QUYET-DINH, con to nay thanh ho so.
 
 ## 0. Loi giao — da sac chua
 
@@ -864,7 +869,28 @@ Chang 2: <...>   -> <...>
 <Chang nao nang o mot trong bon chieu nay thi dang dung: hau qua lon · kho lui ·
 cham tien hoac du lieu ca nhan · sai am tham.>
 
-## 5. Ghi lai — xong roi con lai cai gi
+## 5. Giao di dau — phan nao ban lam, phan nao giao, phan nao KHONG giao
+
+<Chi dien khi viec nay duoc chia cho nhieu hon mot nguoi hoac mot cong cu. Mot
+minh lam het thi bo trong o nay — no khong phai thu tuc.>
+
+GIAO CHO:    <ai, hoac cong cu nao — va lam PHAN NAO>
+SO HUU:      <duong dan ma phan do duoc sua. Trong luc no chay, khong ai khac
+              cham vao>
+GOP TAI:     <cho hai ben gap lai, va nhin vao dau thi biet la gop xong. Dinh
+              cho nay TRUOC khi chia — dinh sau thi moi ben da di mot huong>
+KHONG GIAO:  <phan ban giu lai, va vi sao. Bon chieu o muc "Viec KHONG giao
+              duoc" trong AGENTS.md la cho de quyet>
+
+<Khong cong nao kiem o nay, va ly do khac voi o 0: thu dang so nhat khi chia
+viec — hai luong cung sua mot file — DA co mot thu chan, va no chan rat to. Git
+bao xung dot luc gop, no do, va khong ai bo qua duoc. Mot cong moi o day chi di
+kiem lai thu da duoc kiem.
+
+Phan con lai — giao gi, giu gi — la mot QUYET DINH. Viet ra de lat sau con doi
+chieu duoc voi ket qua, khong phai de may doc.>
+
+## 6. Ghi lai — xong roi con lai cai gi
 
 <Phep thu tai hien loi? Mot dong trong QUYET-DINH? Mot dong trong STATE?
 Mon no phai ghi o day — no khong duoc viet ra thi no la bay co hen gio.>

@@ -45,7 +45,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.12.0"
+PHIEN_BAN = "1.13.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -1219,6 +1219,26 @@ def _pha_quy_uoc(goc):
 cong_quy_uoc.pha = _pha_quy_uoc
 
 
+# Mot dong truong: "TEN: gia tri". Mau nay dung o HAI cho — _muc_truong() va
+# _truong_trong() — nen no phai nam dung mot cho. Chep lam hai ban thi ban thu
+# hai se cu di ma khong ai thay.
+MAU_TRUONG = re.compile(r"^([A-Za-z\u00C0-\u1EF9 ]{3,20}):\s*(.*)$")
+
+
+def _truong_trong(t):
+    """Cac dong "TEN: gia tri" trong mot DOAN van ban, khong can tieu de muc.
+
+    Dung cho nhung cho da cat san doan can doc — vi du muc "viec tiep theo",
+    von co the nam duoi mot tieu de "###" chu khong phai "##".
+    """
+    truong = {}
+    for d in t.splitlines():
+        m = MAU_TRUONG.match(d)
+        if m:
+            truong[khong_dau(m.group(1)).strip()] = m.group(2).strip()
+    return truong
+
+
 def _muc_truong(t):
     """Chia mot file thanh cac muc "## ", moi muc la mot dict truong.
 
@@ -1238,7 +1258,7 @@ def _muc_truong(t):
             continue
         if truong is None:
             continue
-        m = re.match(r"^([A-Za-z\u00C0-\u1EF9 ]{3,20}):\s*(.*)$", d)
+        m = MAU_TRUONG.match(d)
         if m:
             # khong_dau() tra ve CHU THUONG — tra khoa phai dung chu
             # thuong, neu khong cong se im lang vi KHONG THAY MUC NAO.
@@ -2057,6 +2077,15 @@ def cong_viec_tiep(goc):
         ra.append(("--", "Muc 'viec tiep theo' con trong — chua co gi de kiem"))
         return 0, ra
 
+    tr = _truong_trong(than)
+    if not _da_tra_loi(tr.get("viec", "")):
+        ra.append(("HONG", "Muc 'viec tiep theo' khong goi ten MOT viec nao"))
+        ra.append(("   ", "   Them mot dong:  VIEC: <mot viec>"))
+        ra.append(("   ", "Mot doan van ke rang moi thu deu xong van doc len"))
+        ra.append(("   ", "nhu mot cau tra loi — va cong nay tung cho no qua."))
+        ra.append(("   ", "Do duoc ngay 2026-09-17, ngay sau khi giao --tiep."))
+        return 1, ra
+
     ten = dang_lam[0]
     if khong_dau(than).find(khong_dau(ten).strip()) < 0:
         ra.append(("HONG", "'Viec tiep theo' khong nhac giai doan dang lam"))
@@ -2066,12 +2095,14 @@ def cong_viec_tiep(goc):
         ra.append(("   ", "LAM — no cu di ma van doc len nhu mot ke hoach."))
         return 1, ra
 
-    ra.append(("ok", "'Viec tiep theo' dang noi ve: %s" % ten[:52]))
+    ra.append(("ok", "Viec ke tiep: %s" % tr["viec"][:54]))
+    if _da_tra_loi(tr.get("cho ai", "")):
+        ra.append(("  ", "   cho: %s" % tr["cho ai"][:56]))
     return 0, ra
 
 
 cong_viec_tiep.mo_ta = "Viec tiep theo con dung giai doan"
-cong_viec_tiep.chung_minh = "muc 'viec tiep theo' trong file trang thai co goi ten giai doan dang lam"
+cong_viec_tiep.chung_minh = "muc 'viec tiep theo' co mot dong VIEC: da tra loi, VA co goi ten giai doan dang lam"
 cong_viec_tiep.khong_chung_minh = "nhung viec ke trong do DANG lam, hay du, hay xep dung thu tu. No doi chieu hai file, khong doc duoc y dinh."
 
 
@@ -2353,12 +2384,26 @@ def _giai_tiep(goc):
         ra.append((" ", "  Khong co no thi 'tiep' khong giai ra duoc gi — va"))
         ra.append((" ", "  doan bua thi nghe van xuoi."))
         return 1, ra
-    dong = [d.rstrip() for d in than.splitlines() if d.strip()]
-    for d in dong[:14]:
+    tr = _truong_trong(than)
+    if not _da_tra_loi(tr.get("viec", "")):
+        ra.append(("!", "Khong co viec nao duoc goi ten."))
+        ra.append((" ", "  Them vao muc do mot dong:  VIEC: <mot viec>"))
+        ra.append((" ", "  Muc do co the dai va doc rat xuoi ma van khong ke ra"))
+        ra.append((" ", "  viec nao — vi du khi moi dong deu da 'Xong'. Do dung"))
+        ra.append((" ", "  la truong hop cho nay tung cho qua."))
+        return 1, ra
+
+    ra.append((" ", "  VIEC:   %s" % tr["viec"][:66]))
+    if _da_tra_loi(tr.get("cho ai", "")):
+        ra.append((" ", "  CHO AI: %s" % tr["cho ai"][:66]))
+    ra.append((" ", ""))
+    dong = [d.rstrip() for d in than.splitlines()
+            if d.strip() and not MAU_TRUONG.match(d)]
+    for d in dong[:12]:
         ra.append((" ", "  " + d[:74]))
-    if len(dong) > 14:
+    if len(dong) > 12:
         ra.append((" ", "  ... con %d dong, doc %s"
-                   % (len(dong) - 14, ngan(goc, fs))))
+                   % (len(dong) - 12, ngan(goc, fs))))
 
     # ---- cai gi dang chan
     ra.append(("", ""))
