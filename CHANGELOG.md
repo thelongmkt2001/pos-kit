@@ -8,6 +8,44 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.9.0] — 2026-09-17
+
+Thêm **cổng thứ 18**. Bộ nền vẫn 16 file.
+
+### Thêm
+
+- **Cổng `Ban trong kho khop ban da cong bo`** *(cần mạng, chạy với `--ngoai`)*. Khai báo trong
+  `phu-thuoc-ngoai.txt`:
+
+  ```
+  ban-sao kit/cong.py  https://raw.githubusercontent.com/<ban>/<kho>/main/cong.py
+  ```
+
+  Tách làm hai kho là **bắt buộc** khi một bên phải công khai còn bên kia riêng tư. Cái **không**
+  bắt buộc là để việc đồng bộ sống bằng trí nhớ.
+
+  > Hai bản lệch nhau thì **cả hai vẫn chạy được**, và mọi cổng trong nhà vẫn xanh.
+
+  Kho sinh ra bộ kit này dính cả hai vế trong cùng một ngày: ba file chép tay sang kho công khai
+  **sáu lần** trong một buổi, và một bản chép khác bị phát hiện đã **lệch 108 dòng suốt 16 ngày**.
+
+  ⚠️ *"Không tải được bản đã công bố"* tính là **hỏng**. Và cổng so nội dung **bỏ qua khác biệt ký
+  tự xuống dòng** — Windows và Linux ghi khác nhau, mà một cổng báo đỏ vì CRLF thì bị tắt đi trong
+  tuần đầu.
+
+### Sửa
+
+- **Hai cổng đọc `phu-thuoc-ngoai.txt` giờ lọc theo LỚP, không theo từng ca.** Chúng chỉ nhận dòng
+  bắt đầu bằng `http://` hoặc `https://`.
+
+  Lần đầu thêm một dạng dòng mới (`ten-mien ...`), **cả hai** cổng đọc file đó đều gọi nó như một
+  địa chỉ web và đỏ cả hai; sửa từng cái một thì dạng dòng thứ ba lại vấp y hệt. Nay luật viết theo
+  lớp nên `ban-sao ...` không cần sửa thêm chỗ nào.
+
+### Nâng từ 1.8.1
+
+Chép lại `cong.py`. Chưa khai báo `ban-sao` nào thì cổng **im lặng**.
+
 ## [1.8.1] — 2026-09-17
 
 Chỉ sửa một lỗi trong cổng **Sổ giả định có hạn kiểm**. Không đổi số file, không thêm cổng.

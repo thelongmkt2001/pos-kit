@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.8.1"
+PHIEN_BAN = "1.9.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -487,10 +487,13 @@ def cong_phu_thuoc(goc):
         phan = re.split(r"\s{2,}|\t", d, 1)
         url = phan[0].strip()
         vai = phan[1].strip() if len(phan) > 1 else ""
-        # Dong ten mien do cong_ten_mien lo. Khong bo qua o day thi cong
-        # nay goi "ten-mien thelong.tech" nhu mot dia chi web va do — do
-        # vi mot ly do khong lien quan gi toi thu no khai.
-        if url.lower().startswith(TIEN_TO_TEN_MIEN.strip()):
+        # Cong nay CHI nhin cac dong la URL. File khai bao con mang nhung
+        # dang dong khac — "ten-mien ...", "ban-sao ..." — do cong khac lo.
+        #
+        # Luat nay viet theo LOP chu khong theo tung ca: lan dau them mot dang
+        # dong moi, hai cong doc file nay deu goi no nhu mot dia chi web va do
+        # ca hai. Sua tung cai mot thi dang dong thu ba lai vap y het.
+        if not url.lower().startswith(("http://", "https://")):
             continue
         try:
             yc = urllib.request.Request(url, method="HEAD",
@@ -1857,6 +1860,99 @@ def _pha_ten_mien(goc):
 cong_ten_mien.pha = _pha_ten_mien
 
 
+# Dong khai bao ban sao, moi dong: ban-sao <duong dan trong kho><2 dau cach><URL>
+TIEN_TO_BAN_SAO = "ban-sao "
+
+
+def _bo_xuong_dong(t):
+    """So sanh noi dung, khong so ky tu xuong dong.
+
+    Windows va Linux ghi khac nhau, va mot cong bao do vi CRLF thi bi tat di
+    trong tuan dau tien.
+    """
+    return t.replace("\r\n", "\n").replace("\r", "\n").rstrip("\n")
+
+
+def cong_ban_sao(goc):
+    """File trong kho co con khop voi ban DA CONG BO khong. Can mang.
+
+    Tach lam hai kho la BAT BUOC khi mot ben phai cong khai con ben kia rieng
+    tu — khong ai publish duoc mot thu muc con cua kho rieng tu. Cai KHONG bat
+    buoc la de viec dong bo hai ben song bang tri nho.
+
+    Kieu hong o day im lang tuyet doi: hai ban tu tu lech nhau, ca hai deu chay
+    duoc, va moi cong trong nha van xanh.
+    """
+    ra = []
+    f = tim_tep(goc, TEP_PHU_THUOC, "docs/" + TEP_PHU_THUOC)
+    cap = []
+    if f:
+        for d in doc(f).splitlines():
+            d = d.strip()
+            if d.lower().startswith(TIEN_TO_BAN_SAO):
+                phan = re.split(r"\s{2,}|\t", d[len(TIEN_TO_BAN_SAO):].strip(), 1)
+                if len(phan) == 2:
+                    cap.append((phan[0].strip(), phan[1].strip()))
+    if not cap:
+        ra.append(("--", "Khong khai bao ban sao nao — bo qua cong nay"))
+        ra.append(("  ", "Can no khi mot phan cua kho nay duoc cong bo o cho"))
+        ra.append(("  ", "khac. Khai bao trong %s, moi dong:" % TEP_PHU_THUOC))
+        ra.append(("  ", "  ban-sao kit/cong.py<hai dau cach><URL ban cong bo>"))
+        return 0, ra
+
+    import urllib.request
+    hong = 0
+    for duong, url in cap:
+        p = os.path.join(goc, duong)
+        if not os.path.exists(p):
+            ra.append(("HONG", "%-28s khong co trong kho nay" % duong))
+            hong += 1
+            continue
+        try:
+            yc = urllib.request.Request(url, headers={"User-Agent": "kit-cong"})
+            xa = urllib.request.urlopen(yc, timeout=20).read().decode(
+                "utf-8", "replace")
+        except Exception as e:
+            ra.append(("HONG", "%-28s khong tai duoc ban cong bo: %s"
+                       % (duong, type(e).__name__)))
+            ra.append(("   ", "Khong tai duoc KHONG PHAI la 'van khop'."))
+            hong += 1
+            continue
+        if _bo_xuong_dong(doc(p)) == _bo_xuong_dong(xa):
+            ra.append(("ok", "%-28s khop ban da cong bo" % duong))
+        else:
+            ra.append(("HONG", "%-28s LECH voi ban da cong bo" % duong))
+            ra.append(("   ", "   %s" % url[:66]))
+            hong += 1
+    if hong:
+        ra.append(("   ", "Hai ban lech nhau thi ca hai van chay duoc, va moi"))
+        ra.append(("   ", "cong trong nha van xanh. Do la kieu hong im nhat."))
+    return (1 if hong else 0), ra
+
+
+cong_ban_sao.mo_ta = "Ban trong kho khop ban da cong bo"
+cong_ban_sao.can_mang = True
+cong_ban_sao.chung_minh = "tung file DA KHAI BAO giong het ban dang nam o URL tuong ung, bo qua khac biet ky tu xuong dong"
+cong_ban_sao.khong_chung_minh = "ban da khai bao DU cac file duoc cong bo. Mot file cong bo ma khong ai khai thi cong nay khong thay."
+
+
+def _pha_ban_sao(goc):
+    """Gieo mot cap ban-sao doi nhau: mot file trong kho, mot URL khac han."""
+    dong = (NL + "ban-sao kit/bo-qua.txt  "
+            "https://raw.githubusercontent.com/thelongmkt2001/pos-kit/main/LICENSE"
+            + NL)
+    for ten in (TEP_PHU_THUOC, os.path.join("docs", TEP_PHU_THUOC)):
+        duong = os.path.join(goc, ten)
+        if os.path.exists(duong):
+            io.open(duong, "a", encoding="utf-8", newline="").write(dong)
+            return
+    io.open(os.path.join(goc, TEP_PHU_THUOC), "w", encoding="utf-8",
+            newline="").write(dong)
+
+
+cong_ban_sao.pha = _pha_ban_sao
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -1876,6 +1972,7 @@ CAC_CONG = [
     cong_ngan_sach,
     cong_phu_thuoc,
     cong_ten_mien,
+    cong_ban_sao,
 ]
 
 
