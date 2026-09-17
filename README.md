@@ -35,7 +35,7 @@ Thêm artifact khi có một **câu hỏi thật** chưa có chỗ trả lời. 
 Đây là chỗ bộ kit này khác một bộ template.
 
 Dự án sinh ra nó có một sổ ghi lỗi. Sổ đó **gọi tên cơ chế lỗi bằng chữ** — rồi chính cơ chế ấy lặp
-lại **19 lần tính tới 2026-09-17**, trong đó có những lần xảy ra **ngay trong lúc đang viết về nó**,
+lại **20 lần tính tới 2026-09-17**, trong đó có những lần xảy ra **ngay trong lúc đang viết về nó**,
 và một lần xảy ra **bên trong chính công cụ dựng ra để bắt nó**.
 
 Cơ chế đó, nói một lần: một phép đo trả về thứ **có hình dạng của câu trả lời** — một con số, một
