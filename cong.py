@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.24.0"
+PHIEN_BAN = "1.24.1"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2763,10 +2763,6 @@ cong_khi_hong.pha = _pha_khi_hong
 
 
 # ====================================================================== cong 24
-THU_MUC_TAM = ("/temp/", "/tmp/", "\\temp\\", "\\tmp\\",
-               "/appdata/local/temp/", "\\appdata\\local\\temp\\")
-
-
 def cong_noi_lam_viec(goc):
     """Cho dang do co phai noi lam viec that, hay mot ban sao tam.
 
@@ -2807,8 +2803,10 @@ def cong_noi_lam_viec(goc):
     ma, out = git(goc, "rev-parse", "--is-shallow-repository")
     nong = ma == 0 and out.strip() == "true"
 
-    d = os.path.abspath(goc).replace("\\", "/").lower()
-    tam = any(x.replace("\\", "/") in d + "/" for x in THU_MUC_TAM)
+    # CO remote thi day khong phai ban duy nhat. Dung voi MOI ban clone, ke ca
+    # ban day du — nen no la mot dong THONG BAO, khong phai co lam do cong.
+    ma3, out3 = git(goc, "remote")
+    co_remote = ma3 == 0 and bool(out3.strip())
 
     # LUON in so muc ban. "Cay sach" la mot gia dinh de dat ma khong kiem — toi
     # da dat no hai lan trong mot phien, va sai ca hai.
@@ -2819,11 +2817,14 @@ def cong_noi_lam_viec(goc):
     else:
         ra.append(("--", "Cay lam viec: khong doc duoc (khong phai kho git?)"))
 
+    if co_remote:
+        ra.append(("--", "Kho nay co remote — day khong phai ban duy nhat."))
+        ra.append(("  ", "Viec ai do dang lam o mot ban khac la VO HINH o day:"))
+        ra.append(("  ", "no nam trong cay lam viec cua ho, khong trong lich su git."))
+
     vi = []
     if nong:
         vi.append("kho NONG — lich su bi cat")
-    if tam:
-        vi.append("nam trong thu muc TAM")
 
     if not vi:
         ra.append(("ok", "Day la mot ban lam viec day du, khong phai ban sao tam"))
@@ -2838,11 +2839,9 @@ def cong_noi_lam_viec(goc):
 
     ra.append(("HONG", "Day la mot BAN SAO, va khong ai khai dieu do: "
                + "; ".join(vi)))
-    ra.append(("   ", "Hai muoi ba cong con lai deu doc kho qua git. Tren mot ban"))
-    ra.append(("   ", "sao, chung tra loi VE BAN SAO — va doc len y het nhu khi"))
-    ra.append(("   ", "chung noi ve du an."))
-    ra.append(("   ", "Va mot ban sao KHONG NHIN THAY viec dang lam: viec do nam"))
-    ra.append(("   ", "trong cay lam viec cua may khac, khong trong lich su git."))
+    ra.append(("   ", "Hai muoi ba cong con lai deu doc kho qua git. Tren mot kho"))
+    ra.append(("   ", "NONG, moi cau hoi ve qua khu chi tra loi ve doan da tai ve"))
+    ra.append(("   ", "— va doc len y het nhu khi chung noi ve ca du an."))
     ra.append(("   ", "Biet roi thi khai: them  --ban-sao"))
     return 1, ra
 
@@ -2852,8 +2851,8 @@ def cong_noi_lam_viec(goc):
 # dung cho no can co mat. Bat duoc ngay lan chay thu dau tien.
 cong_noi_lam_viec.nhin_kho = True
 cong_noi_lam_viec.mo_ta = "Cho dang do la noi lam viec that"
-cong_noi_lam_viec.chung_minh = ("kho khong nong va khong nam trong thu muc tam;"
-                                " va so muc ban cua cay lam viec duoc in ra moi lan")
+cong_noi_lam_viec.chung_minh = ("kho khong bi cat lich su (khong NONG); va so muc ban cua cay"
+                                " lam viec — cung viec kho co remote hay khong — duoc in ra moi lan")
 cong_noi_lam_viec.khong_chung_minh = (
     "khong ai dang sua kho nay o mot may khac. Khong phep kiem nao trong mot ban"
     " chep tra loi duoc cau do — do dung la ly do cong nay ton tai."
@@ -2863,8 +2862,20 @@ cong_noi_lam_viec.khong_chung_minh = (
 
 
 def _pha_noi_lam_viec(goc):
-    """Pha: lam cho no NONG. Ban chep de --tu-kiem bo .git di, nen gieo mot
-    file danh dau ma git doc la dau hieu kho nong."""
+    """Pha: lam cho no NONG that su.
+
+    Ban chep cua --tu-kiem bo .git di, nen chi ghi mot file `.git/shallow` vao
+    thu muc tran la KHONG DU — git tra ve "fatal: not a git repository" va cong
+    van xanh. Do duoc 2026-09-17:
+
+        thu muc tran + .git/shallow   -> fatal: not a git repository
+        git init that + .git/shallow  -> true
+
+    Truoc do phep pha nay van "dat", nhung vi mot LY DO SAI: cong dang do san
+    boi mot dau vet khac (thu muc tam) da bi bo di vi no keu nham. Bo dau vet ay
+    lam lo nay lo ra — dung kieu mot cong xanh vi ly do sai.
+    """
+    git(goc, "init")
     thu = os.path.join(goc, ".git")
     if not os.path.isdir(thu):
         os.makedirs(thu)
@@ -3177,7 +3188,7 @@ def tu_kiem():
     shutil.copytree(GOC, sach,
                     ignore=shutil.ignore_patterns(*BO_QUA_THU_MUC, "*.pyc"))
 
-    dat = truot = bo = khong_do = 0
+    dat = truot = bo = khong_do = chua_co = 0
     try:
         for so, c in enumerate(CAC_CONG, 1):
             if getattr(c, "can_mang", False) and not co_mang:
@@ -3191,7 +3202,8 @@ def tu_kiem():
                 bo += 1
                 continue
 
-            ma_sach, _ = c(sach)
+            ma_sach, dong_sach = c(sach)
+
 
             # Nen da do thi PHEP THU NAY KHONG DO DUOC GI. Truoc day truong hop
             # do bi in ra la "TRUOT", doc y het "cong nay mu" — trong khi su
@@ -3212,26 +3224,49 @@ def tu_kiem():
             try:
                 c.pha(pha)
             except Exception as e:
+                # Mot du an VUA DUNG khong co gi de pha o vai cong — ban nen cua
+                # khoi-tao.py khong tao moi file, va chua co giai doan nao. Do la
+                # TINH CHAT cua mot du an moi, khong phai mot cong hong. Dem
+                # rieng, va noi ro, neu khong `--tu-kiem` se thoat 1 ngay lan
+                # chay dau tien cua nguoi dung moi — bao hong trong khi khong co
+                # gi hong.
                 print()
-                print("  LOI     %-34s khong gieo duoc loi: %s" % (c.mo_ta, e))
-                truot += 1
+                print("  CHUA CO %-34s khong co gi de pha: %s" % (c.mo_ta, e))
+                print("          >> Du an nay chua co thu ma cong do canh.")
+                print("          >> Dien vao roi chay lai thi moi do duoc.")
+                chua_co += 1
                 continue
             ma_pha, _ = c(pha)
 
             khac = ma_sach != ma_pha
+            nen_im = not any(n.strip() == "ok" for n, _ in dong_sach)
+            # Nhan phai duoc quyet TRUOC khi in. Truoc day dong nay luon in
+            # "TRUOT" khi ma thoat khong doi, ke ca nhung truong hop tong ket
+            # dem la "chua co" — nguoi doc thay TRUOT thi hieu la co cong mu.
+            nhan = "DAT" if khac else ("CHUA CO" if nen_im else "TRUOT")
             print()
             print("  %-7s %-34s ma thoat: %d -> %d"
-                  % ("DAT" if khac else "TRUOT", c.mo_ta, ma_sach, ma_pha))
+                  % (nhan, c.mo_ta, ma_sach, ma_pha))
             if khac:
                 dat += 1
+            elif nen_im:
+                # Khong doi VA nen dang im = du an chua co thu cong ay canh.
+                # Mot so phep pha TAO RA thu can kiem (cong "vong doi" gieo han
+                # mot file khai SUPERSEDED), nen khong duoc phan xu trươc khi
+                # pha — lam the la mien cho mot cong that su da chung minh duoc.
+                chua_co += 1
+                print("          >> Nen dang IM: du an nay chua co thu cong do")
+                print("          >> canh, va phep pha nay khong tu tao ra no.")
+                print("          >> Dien vao roi chay lai thi moi do duoc.")
             else:
                 truot += 1
                 print("          >> CONG NAY KHONG NHIN THAY CHUYEN DO.")
                 print("          >> Truoc khi ket luan cong hong, hoi cau nay TRUOC:")
                 print("          >>   phep PHA cua toi co pha dung cho khong?")
-                print("          >> Du an sinh ra file nay chay phep kiem tuong tu va")
-                print("          >> co 3 cong 'khong bat duoc gi' — ca ba deu la PHEP")
-                print("          >> THU viet sai, khong phai cong mu.")
+                print("          >> Du an sinh ra file nay da gap dung chuyen do,")
+                print("          >> va LAN NAO cung la PHEP THU viet sai chu khong")
+                print("          >> phai cong mu. Khong dem so o day: mot con so")
+                print("          >> chep tay vao mot thong bao la mot con so se muc.")
     finally:
         shutil.rmtree(tam, ignore_errors=True)
 
@@ -3239,6 +3274,10 @@ def tu_kiem():
     print("  " + "-" * 68)
     print("  %d cong chung minh duoc la truot duoc | %d khong | %d bo qua"
           % (dat, truot, bo))
+    if chua_co:
+        print("  %d cong chua do duoc vi DU AN NAY CHUA CO thu chung canh —"
+              % chua_co)
+        print("  khac han voi 'cong mu'. Dien vao roi chay lai.")
     if khong_do:
         print("  %d cong KHONG DO DUOC vi nen dang do — khac han voi 'mu'."
               % khong_do)
