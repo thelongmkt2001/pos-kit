@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.23.0"
+PHIEN_BAN = "1.24.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2096,6 +2096,17 @@ def _bo_xuong_dong(t):
     return t.replace("\r\n", "\n").replace("\r", "\n").rstrip("\n")
 
 
+def _khai_ban_sao():
+    """Nguoi chay co khai rang day la mot ban sao khong.
+
+    Mien tru phai duoc KHAI va phai duoc IN RA moi lan — chay tren mot ban sao
+    la chuyen binh thuong, CI lam the moi ngay, nen mot cong do vi dieu do se bi
+    tat trong tuan dau. Cai khong duoc phep la doc ket qua cua mot ban sao nhu
+    the no noi ve du an.
+    """
+    return "--ban-sao" in sys.argv
+
+
 def _token_gh():
     """Token cua `gh` neu co, de khong dung han muc khach la.
 
@@ -2751,6 +2762,119 @@ def _pha_khi_hong(goc):
 cong_khi_hong.pha = _pha_khi_hong
 
 
+# ====================================================================== cong 24
+THU_MUC_TAM = ("/temp/", "/tmp/", "\\temp\\", "\\tmp\\",
+               "/appdata/local/temp/", "\\appdata\\local\\temp\\")
+
+
+def cong_noi_lam_viec(goc):
+    """Cho dang do co phai noi lam viec that, hay mot ban sao tam.
+
+    Hai mươi ba cong con lai deu doc kho qua git va he tap tin. Tren mot ban sao
+    tam, moi cau tra loi cua chung deu la VE BAN SAO — va doc len y het nhu khi
+    chung noi ve du an.
+
+    VI SAO CO NO: hai ket luan sai trong cung mot phien, 2026-09-17, ca hai tu
+    cho mu nay, va mot trong hai da di vao PR cua mot kho tien that.
+
+      So seo 23   `git status` tren mot ban clone bao 12 file ban -> ket luan
+                  "kho ay commit voi CRLF". Blob co 0 ky tu CR. Tat cua BAN SAO.
+      So seo 24   `git log` tren cung ban clone: hai commit cuoi deu la
+                  "coordination:" -> ket luan "ghe trong, khong ai dang lam".
+                  Mot phien DANG CHAY tren cay lam viec that, sua dung file do.
+                  `git log` noi cai gi DA HA CANH; viec dang lam nam trong CAY
+                  LAM VIEC, ma mot ban clone moi thi khong co.
+
+    DA THAY NO DO, VA KHONG PHAI BANG HOP CAT
+
+    `--tu-kiem` khong do duoc cong nay: hop cat cua no CHINH LA mot ban sao tam,
+    nen cong do san truoc khi pha, va phep thu tra ve "KHONG DO DUOC" — dung va
+    thanh that. No duoc chung minh bang hai noi lam viec THAT, do 2026-09-17:
+
+        ban lam viec day du cua du an nay
+            python kit/cong.py               -> thoat 0, "ban lam viec day du"
+
+        ban clone nong trong thu muc tam
+            python cong.py --kho             -> thoat 1, goi ten ca hai dau vet
+            python cong.py --kho --ban-sao   -> thoat 0, VAN in ra la ban sao
+
+    Hai noi that, hai ket qua khac nhau, dung chieu. Manh hon mot phep pha mo
+    phong.
+    """
+    ra = []
+    khai = _khai_ban_sao()
+
+    ma, out = git(goc, "rev-parse", "--is-shallow-repository")
+    nong = ma == 0 and out.strip() == "true"
+
+    d = os.path.abspath(goc).replace("\\", "/").lower()
+    tam = any(x.replace("\\", "/") in d + "/" for x in THU_MUC_TAM)
+
+    # LUON in so muc ban. "Cay sach" la mot gia dinh de dat ma khong kiem — toi
+    # da dat no hai lan trong mot phien, va sai ca hai.
+    ma2, out2 = git(goc, "status", "--porcelain")
+    if ma2 == 0:
+        ban = len([x for x in out2.splitlines() if x.strip()])
+        ra.append(("--", "Cay lam viec: %d muc ban" % ban))
+    else:
+        ra.append(("--", "Cay lam viec: khong doc duoc (khong phai kho git?)"))
+
+    vi = []
+    if nong:
+        vi.append("kho NONG — lich su bi cat")
+    if tam:
+        vi.append("nam trong thu muc TAM")
+
+    if not vi:
+        ra.append(("ok", "Day la mot ban lam viec day du, khong phai ban sao tam"))
+        ra.append(("   ", "Cac cong khac dang noi ve DU AN, khong phai ve mot ban chep."))
+        return 0, ra
+
+    if khai:
+        ra.append(("--", "BAN SAO, da khai bang --ban-sao: " + "; ".join(vi)))
+        ra.append(("  ", "Moi cau tra loi duoi day la VE BAN NAY, khong phai ve du an."))
+        ra.append(("  ", "Nhat la: mot ban sao KHONG nhin thay viec ai do dang lam do."))
+        return 0, ra
+
+    ra.append(("HONG", "Day la mot BAN SAO, va khong ai khai dieu do: "
+               + "; ".join(vi)))
+    ra.append(("   ", "Hai muoi ba cong con lai deu doc kho qua git. Tren mot ban"))
+    ra.append(("   ", "sao, chung tra loi VE BAN SAO — va doc len y het nhu khi"))
+    ra.append(("   ", "chung noi ve du an."))
+    ra.append(("   ", "Va mot ban sao KHONG NHIN THAY viec dang lam: viec do nam"))
+    ra.append(("   ", "trong cay lam viec cua may khac, khong trong lich su git."))
+    ra.append(("   ", "Biet roi thi khai: them  --ban-sao"))
+    return 1, ra
+
+
+# NHIN KHO. `--kho` la lenh nguoi ta chay tren mot kho LA — tuc dung luc de
+# dang ngoi trong mot ban chep tam nhat. Bo cong nay ra khoi `--kho` la bo no ra
+# dung cho no can co mat. Bat duoc ngay lan chay thu dau tien.
+cong_noi_lam_viec.nhin_kho = True
+cong_noi_lam_viec.mo_ta = "Cho dang do la noi lam viec that"
+cong_noi_lam_viec.chung_minh = ("kho khong nong va khong nam trong thu muc tam;"
+                                " va so muc ban cua cay lam viec duoc in ra moi lan")
+cong_noi_lam_viec.khong_chung_minh = (
+    "khong ai dang sua kho nay o mot may khac. Khong phep kiem nao trong mot ban"
+    " chep tra loi duoc cau do — do dung la ly do cong nay ton tai."
+    " Va `--tu-kiem` KHONG do duoc cong nay: hop cat cua no chinh la mot ban sao"
+    " tam, nen cong do san truoc khi pha. Xem docstring cua ham: no duoc chung"
+    " minh bang hai noi lam viec THAT.")
+
+
+def _pha_noi_lam_viec(goc):
+    """Pha: lam cho no NONG. Ban chep de --tu-kiem bo .git di, nen gieo mot
+    file danh dau ma git doc la dau hieu kho nong."""
+    thu = os.path.join(goc, ".git")
+    if not os.path.isdir(thu):
+        os.makedirs(thu)
+    io.open(os.path.join(thu, "shallow"), "w", encoding="utf-8",
+            newline="").write("0" * 40 + "\n")
+
+
+cong_noi_lam_viec.pha = _pha_noi_lam_viec
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -2776,6 +2900,7 @@ CAC_CONG = [
     cong_ten_mien,
     cong_ban_sao,
     cong_ha_tang,
+    cong_noi_lam_viec,
 ]
 
 
