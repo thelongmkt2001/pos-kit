@@ -8,6 +8,25 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.9.1] — 2026-09-17
+
+Sửa một lỗi **của chính cổng 18**, bắt được ngay ở lần chạy thứ hai của nó.
+
+### Sửa
+
+- **Cổng `ban-sao` báo đỏ giả ngay sau mỗi lần công bố.** Nó đọc qua CDN, và CDN giữ bản cũ vài
+  phút — nên vừa đẩy bản mới lên xong là nó báo *LỆCH* trong khi hai bên thật sự đã khớp.
+
+  Một cổng kêu nhầm vài phút sau mỗi lần công bố thì sẽ **bị tắt đi**, và lúc đó nó không bảo vệ gì
+  nữa.
+
+  Nay nó xin CDN đừng trả bản cache (`Cache-Control: no-cache`). Nhưng cái đó **không đảm bảo**, nên
+  cổng **nói thẳng** trong thông báo đỏ: *vừa công bố xong mà thấy lệch thì khả năng cao là CDN chưa
+  kịp — đợi vài phút rồi chạy lại.*
+
+  ⚠️ Dòng *KHÔNG chứng minh* của cổng ghi rõ: nó **không phân biệt được** *"lệch thật"* với *"CDN
+  chưa kịp cập nhật"*.
+
 ## [1.9.0] — 2026-09-17
 
 Thêm **cổng thứ 18**. Bộ nền vẫn 16 file.

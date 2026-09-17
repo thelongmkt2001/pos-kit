@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.9.0"
+PHIEN_BAN = "1.9.1"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -1909,7 +1909,14 @@ def cong_ban_sao(goc):
             hong += 1
             continue
         try:
-            yc = urllib.request.Request(url, headers={"User-Agent": "kit-cong"})
+            # Xin dung tra ban cache. Nhieu CDN giu ban cu vai phut, va ngay
+            # sau mot lan cong bo thi cong nay se bao LECH trong khi hai ben
+            # that su da khop.
+            yc = urllib.request.Request(url, headers={
+                "User-Agent": "kit-cong",
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache",
+            })
             xa = urllib.request.urlopen(yc, timeout=20).read().decode(
                 "utf-8", "replace")
         except Exception as e:
@@ -1927,13 +1934,16 @@ def cong_ban_sao(goc):
     if hong:
         ra.append(("   ", "Hai ban lech nhau thi ca hai van chay duoc, va moi"))
         ra.append(("   ", "cong trong nha van xanh. Do la kieu hong im nhat."))
+        ra.append(("   ", "NHUNG: vua cong bo xong ma thay LECH thi kha nang cao"))
+        ra.append(("   ", "la CDN chua kip — doi vai phut roi chay lai. Cong nay"))
+        ra.append(("   ", "KHONG phan biet duoc hai truong hop do."))
     return (1 if hong else 0), ra
 
 
 cong_ban_sao.mo_ta = "Ban trong kho khop ban da cong bo"
 cong_ban_sao.can_mang = True
 cong_ban_sao.chung_minh = "tung file DA KHAI BAO giong het ban dang nam o URL tuong ung, bo qua khac biet ky tu xuong dong"
-cong_ban_sao.khong_chung_minh = "ban da khai bao DU cac file duoc cong bo. Mot file cong bo ma khong ai khai thi cong nay khong thay."
+cong_ban_sao.khong_chung_minh = "ban da khai bao DU cac file duoc cong bo. Mot file cong bo ma khong ai khai thi cong nay khong thay. Va no KHONG phan biet duoc 'lech that' voi 'CDN chua kip cap nhat' — vua cong bo xong thi doi vai phut roi chay lai."
 
 
 def _pha_ban_sao(goc):
