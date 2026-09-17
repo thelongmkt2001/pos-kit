@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.21.0"
+PHIEN_BAN = "1.23.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -542,6 +542,13 @@ cong_vong_doi.pha = lambda g: _pha_vong_doi(g)
 
 
 # ======================================================================= cong 6
+# Mot phep kiem "con song khong" khong duoc tu xung la ai khac. Nhung rat nhieu
+# may chu loc bot theo User-Agent, va mot cai ten la bi chan thi cong bao CHET
+# tren mot dich vu dang chay — do duoc tren fapi.binance.com ngay 2026-09-17.
+UA_THAT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+           "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 kit-cong")
+
+
 def cong_phu_thuoc(goc):
     """Cac URL ngoai ma du an dua vao co con song khong. Can mang."""
     import urllib.request
@@ -569,13 +576,21 @@ def cong_phu_thuoc(goc):
         # ca hai. Sua tung cai mot thi dang dong thu ba lai vap y het.
         if not url.lower().startswith(("http://", "https://")):
             continue
+        # GET, KHONG HEAD. Do duoc 2026-09-17: ipify tra 520 cho HEAD va 200
+        # cho GET, con Binance chan hep User-Agent la. Ba dich vu con song bi
+        # bao la chet — va mot cong keu nham ba lan la mot cong sap bi tat.
         try:
-            yc = urllib.request.Request(url, method="HEAD",
-                                        headers={"User-Agent": "kit-cong"})
-            ma = urllib.request.urlopen(yc, timeout=15).status
+            yc = urllib.request.Request(url, headers={"User-Agent": UA_THAT})
+            r = urllib.request.urlopen(yc, timeout=15)
+            r.read(64)      # cham vao than phan hoi, nhung khong tai ca file
+            ma = r.status
             ok = 200 <= ma < 400
         except Exception as e:
-            ma, ok = type(e).__name__, False
+            # GOI TEN ma loi. "HTTPError" tran doi hai viec khac han nhau:
+            # 403 la bi chan, 404 la sai duong, 5xx la ben kia dang hong.
+            ma = getattr(e, "code", None)
+            ma = ("HTTP %d" % ma) if isinstance(ma, int) else type(e).__name__
+            ok = False
         ra.append(("ok" if ok else "HONG", "%-58s %s" % (url[:58], vai[:40])))
         if not ok:
             ra.append(("   ", "-> %s" % ma))
@@ -786,6 +801,57 @@ def _pha_rui_ro(goc):
 
 
 # ======================================================================= cong 9
+DUOI_MA = (".py", ".sh", ".ps1", ".bat", ".cmd", ".yml", ".yaml", ".toml",
+           ".cfg", ".ini", ".env", ".js", ".ts", ".tsx", ".jsx", ".go",
+           ".rb", ".rs", ".java", ".php", ".sql", ".tf", ".dockerfile",
+           # Trang web la thu CHAY. Mot the <script src> la loi goi that, va no
+           # chay tren may NGUOI DOC — hong thi con kho thay hon hong o nha.
+           ".html", ".htm", ".vue", ".svelte", ".css")
+
+
+def _la_ten_khong_gian(dong, vi_tri):
+    """URL nay la TEN GOI hay DAU CUOI?
+
+    `xmlns="http://www.w3.org/2000/svg"` khong goi ai ca — do la mot cai ten.
+    Voi bieu thuc chinh quy thi no doc y het mot dau cuoi that, va tinh no vao
+    thi cong keu nham tren moi du an co SVG hoac XML. Bat theo NGU CANH ngay
+    truoc URL, khong theo mot danh sach ten mien can nuoi.
+    """
+    truoc = dong[:vi_tri]
+    cuoi = truoc[-60:].lower()
+    if "xmlns" in cuoi:
+        return True
+    # ElementTree viet ten khong gian trong ngoac nhon: "{http://...}the"
+    if truoc.rstrip().endswith("{") or truoc.rstrip().endswith('"{')             or truoc.rstrip().endswith("'{"):
+        return True
+    return False
+
+
+def _la_ma_hoac_cau_hinh(duong):
+    """File nay la thu CHAY, hay chi la thu DOC?
+
+    Ranh gioi nay khong phai de cho cong de tho hon. No la ranh gioi that:
+    mot dia chi ma chuong trinh GOI thi chet duoc va keo ca he thong theo; mot
+    dia chi ma chuong trinh GHI LAI — URL bao chi trong mot ban bao cao da thu
+    ve — thi khong chet theo nghia do.
+
+    Do tren kho `autonomous-ai-binance-futures` 2026-09-17: 118 mien tim thay,
+    38 nam trong ma va cau hinh, 97 chi nam trong tai lieu va du lieu. Bat cong
+    do vi ca 118 thi no keu nham ngay lan chay dau, va mot cong keu nham la mot
+    cong sap bi tat.
+    """
+    d = duong.replace("\\", "/").lower()
+    ten = d.rsplit("/", 1)[-1]
+    if ten in ("dockerfile", "makefile", "procfile"):
+        return True
+    if ten.startswith(".env"):
+        return True
+    # File cau hinh thi ke ca duoi .json/.md cung la thu chay theo.
+    if d.startswith("config/") or "/config/" in d:
+        return True
+    return d.endswith(DUOI_MA)
+
+
 def _dau_vet_cho_dua(goc):
     """Bang chung rang du an NAY that su co cho dua ben ngoai.
 
@@ -793,8 +859,14 @@ def _dau_vet_cho_dua(goc):
       - remote git tro ra ngoai;
       - dong da khai bao trong phu-thuoc-ngoai.txt;
       - mien ngoai xuat hien trong file dang theo doi.
+
+    Tra ve nam thu: (tat ca, ma-goi, chi-nam-trong-tai-lieu, da quet, tong file).
+    Ba thu dau la tap mien; hai thu sau de cong NOI RA no da nhin bao nhieu —
+    mot cong khong noi pham vi thi "khong thay gi" doc y het "khong nhin toi".
     """
     dau = set()
+    ma_goi = set()
+    chi_doc = set()
 
     ma, out = git(goc, "remote", "-v")
     if ma == 0:
@@ -824,7 +896,12 @@ def _dau_vet_cho_dua(goc):
         # hon han no to ra. Cong bi mat da co dung nhanh nay tu truoc.
         tep = list(moi_file(goc, (".md", ".txt", ".py", ".js", ".ts", ".json",
                                   ".html", ".yml", ".yaml", ".toml", ".cfg")))
-    for p in tep[:400]:
+    # KHONG CAT. Ban dau cho nay la `tep[:400]`, va tren mot kho 1.834 file no
+    # bao "11 cho dua" trong khi chinh phuong phap nay thay 118. Tran ay cung
+    # khong tiet kiem gi: 400 file dau cua kho ay da la 77MB, va bo tran di chi
+    # cham them 2,6 giay. No khong chan cong viec, no chan TAM NHIN.
+    da_quet = 0
+    for p in tep:
         if not os.path.isfile(p):
             continue
         # Bo qua chinh bo cong: file nay chua cac URL VI DU dung de pha trong
@@ -836,6 +913,8 @@ def _dau_vet_cho_dua(goc):
         # dung cach — ton trong dau '#'.
         if os.path.basename(p) == TEP_PHU_THUOC:
             continue
+        da_quet += 1
+        o_ma = _la_ma_hoac_cau_hinh(ngan(goc, p))
         for dong in doc(p).splitlines():
             # BO QUA DONG DA COMMENT. Mot URL vi du nam sau dau '#' khong phai
             # mot cho dua. Ban dau vong nay doc thang ca file, va mot dong mau
@@ -845,9 +924,16 @@ def _dau_vet_cho_dua(goc):
                 continue
             for m in re.finditer(r"https?://([a-zA-Z0-9.\-]+)", dong):
                 g = m.group(1).lower()
-                if not g.startswith(("127.0.0.1", "localhost", "example.")):
-                    dau.add(g)
-    return dau
+                if g.startswith(("127.0.0.1", "localhost", "example.")):
+                    continue
+                if _la_ten_khong_gian(dong, m.start()):
+                    continue
+                dau.add(g)
+                (ma_goi if o_ma else chi_doc).add(g)
+    # TRU DI. `chi_doc` phai la nhung mien KHONG he xuat hien trong ma. Khong
+    # tru thi dong in ra noi sai han nghia cua no — va mot cong noi sai ve chinh
+    # phan no mien tru la cong te nhat trong ca bo.
+    return dau, ma_goi, chi_doc - ma_goi, da_quet, len(tep)
 
 
 def cong_cho_dua(goc):
@@ -856,18 +942,40 @@ def cong_cho_dua(goc):
     f = tim_tep(goc, "CHO-DUA.md", "docs/CHO-DUA.md", "CONG-CU.md",
                 "docs/CONG-CU.md", "TOOLS.md", "docs/TOOLS.md")
 
-    dau = _dau_vet_cho_dua(goc)
+    dau, ma_goi, chi_doc, da_quet, tong = _dau_vet_cho_dua(goc)
+
+    # PHAM VI, IN MOI LAN. Truoc 2026-09-17 cong nay quet 400 file dau roi bao
+    # con so nhu the da do het kho: tren mot kho 1.834 file no noi "11" trong
+    # khi chinh no, bo tran di, thay 118. Mot cong khong noi no nhin bao nhieu
+    # thi "khong thay gi" doc y het "khong nhin toi".
+    pham_vi = "quet %d/%d file dang theo doi" % (da_quet, tong)
 
     if not dau:
-        ra.append(("--", "Khong thay dau vet cho dua ben ngoai nao"))
+        ra.append(("--", "Khong thay dau vet cho dua ben ngoai nao (%s)" % pham_vi))
         ra.append(("  ", "Du an chua noi ra ngoai, hoac chua commit gi. Cong nay"))
         ra.append(("  ", "chua co gi de doi chieu — do KHONG phai 'da sach'."))
         return 0, ra
 
+    # MIEN TRU, IN MOI LAN. Cong do o phia ma; nhung con so phia tai lieu khong
+    # duoc bien mat, vi mot mien tru khong ai nhin thay thi chang khac gi mot
+    # cho mu. Luat cho soi: khai ra va in ra, dung ha cong xuong thanh canh bao.
+    if chi_doc:
+        ra.append(("--", "%d mien CHI nam trong tai lieu/du lieu — khong tinh la"
+                         " cho dua" % len(chi_doc)))
+        ra.append(("  ", "   " + ", ".join(sorted(chi_doc)[:5])
+                   + (" ..." if len(chi_doc) > 5 else "")))
+        ra.append(("  ", "Chuong trinh GHI LAI mot dia chi thi no khong chet theo"))
+        ra.append(("  ", "nghia nay. Chuong trinh GOI thi co. Cong chi do phia goi."))
+
+    if not ma_goi:
+        ra.append(("ok", "Khong mien ngoai nao nam trong ma hay cau hinh (%s)"
+                   % pham_vi))
+        return 0, ra
+
     if not f:
-        ra.append(("HONG", "Thay %d cho dua ben ngoai, khong co file nao ghi chung"
-                   % len(dau)))
-        for x in sorted(dau)[:8]:
+        ra.append(("HONG", "Ma va cau hinh goi %d cho dua, khong co file nao ghi"
+                           " chung (%s)" % (len(ma_goi), pham_vi)))
+        for x in sorted(ma_goi)[:8]:
             ra.append(("   ", "   %s" % x))
         ra.append(("   ", "Thu chay tot thi thoi duoc nhin thay. Cai khong ai viet"))
         ra.append(("   ", "ra thi khong phep kiem nao nhin toi — va khi no chet,"))
@@ -882,23 +990,23 @@ def cong_cho_dua(goc):
             and not h.strip().strip("|").split("|")[0].strip().startswith("<")]
 
     if not that:
-        ra.append(("HONG", "Thay %d cho dua ben ngoai, nhung %s chua ghi cai nao"
-                   % (len(dau), ngan(goc, f))))
-        for x in sorted(dau)[:8]:
+        ra.append(("HONG", "Ma goi %d cho dua, nhung %s chua ghi cai nao"
+                   % (len(ma_goi), ngan(goc, f))))
+        for x in sorted(ma_goi)[:8]:
             ra.append(("   ", "   %s" % x))
         ra.append(("   ", "May chi dua duoc UNG VIEN — no khong phan biet duoc"))
         ra.append(("   ", "'thu toi dua vao' voi 'thu toi tinh co nhac ten'."))
         ra.append(("   ", "Doc tung cai roi ghi, dung chep thang danh sach nay."))
         return 1, ra
 
-    ra.append(("ok", "%s: %d cho dua da ghi | thay %d dau vet"
-               % (ngan(goc, f), len(that), len(dau))))
+    ra.append(("ok", "%s: %d cho dua da ghi | ma goi %d | %s"
+               % (ngan(goc, f), len(that), len(ma_goi), pham_vi)))
     return 0, ra
 
 
 cong_cho_dua.nhin_kho = True
 cong_cho_dua.mo_ta = "Cho dua duoc ghi ra"
-cong_cho_dua.chung_minh = "khi co dau vet cho dua ben ngoai, co mot danh sach da ghi it nhat mot dong"
+cong_cho_dua.chung_minh = ("khi MA hoac CAU HINH goi ra ngoai, co mot danh sach da ghi it nhat mot dong; va so file da quet duoc in ra moi lan")
 cong_cho_dua.khong_chung_minh = "danh sach do DU, hay DUNG. Thu ban quen thi phep kiem nay cung khong biet la ban quen."
 cong_cho_dua.pha = lambda g: _pha_cho_dua(g)
 
