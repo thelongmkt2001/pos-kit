@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.24.3"
+PHIEN_BAN = "1.24.4"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -494,7 +494,13 @@ def cong_vong_doi(goc):
         # assumptions"). Do la khop HINH DANG thay vi khop thu can tim — dung ho
         # loi ma ca bo cong nay sinh ra de chan.
         for d in doc(f)[:1200].splitlines():
-            m = re.match(r"^\s*(?:>|\*\*|#+)?\s*"
+            # BAT KY to hop nao cua `-`, `*`, `>`, `#` o dau dong. Ban dau mau
+            # nay cho phep DUNG MOT tien to, nen dang thuc te trong kho —
+            # `- **Status:** ...` — truot het. Muoi hai ADR dung dang do, trong
+            # do co MOT ADR tu khai la da bi thay the, va cong van bao 'khong
+            # file nao KHAI BAO trang thai da bo'. Cau ay doc thanh 'khong co
+            # gi bi bo', trong khi su that la 'toi khong doc duoc dong do'.
+            m = re.match(r"^[\s\-\*>#]*"
                          r"(?:STATUS|TRANG THAI|TR\u1ea0NG TH\u00c1I|Status)"
                          r"\s*[:\*]*\s*(.+)$", d.strip())
             if not m:
