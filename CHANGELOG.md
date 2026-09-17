@@ -8,6 +8,27 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.8.1] — 2026-09-17
+
+Chỉ sửa một lỗi trong cổng **Sổ giả định có hạn kiểm**. Không đổi số file, không thêm cổng.
+
+### Sửa
+
+- **Cổng giả định đọc sai ngày.** Nó tìm ngày bằng `re.search` trên **cả dòng** và lấy **ngày đầu
+  tiên** thấy được. Một hàng thật thường có ngày ở cột khác — *"từ đâu ra"*, *"đo ngày nào"* — và
+  cổng nhặt đúng ngày ấy, rồi báo **quá hạn** cho một giả định còn hạn hàng tháng.
+
+  Nó **khai** đọc *hạn kiểm*. Nó **đo** *ngày đầu tiên trên dòng*.
+
+  > Mẫu đi kèm bộ kit chỉ có **đúng một ngày mỗi hàng**, nên chỗ này không bao giờ lộ ra: cổng xanh
+  > vì chưa ai đưa cho nó một hàng đủ thật.
+
+  Nay nó đọc ở **cột áp chót** — cột hạn kiểm, tính từ phải sang, vì cột trạng thái là cột cuối.
+  `--tu-kiem` vẫn chứng minh được cổng này trượt được.
+
+  ⚠️ Nếu bảng giả định của bạn có thứ tự cột khác, hãy giữ **hạn kiểm ở cột áp chót và trạng thái ở
+  cột cuối** — đó là thứ tự của mẫu, và giờ là thứ tự cổng dựa vào.
+
 ## [1.8.0] — 2026-09-17
 
 Thêm **cổng thứ 17**. Bộ nền vẫn 16 file.

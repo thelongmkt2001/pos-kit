@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.8.0"
+PHIEN_BAN = "1.8.1"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -222,7 +222,15 @@ def cong_gia_dinh(goc):
         co_tt = any(tt in h.upper() for tt in TRANG_THAI_GD)
         if not co_tt:
             thieu.append(noi_dung[:54])
-        ngay = re.search(r"(20\d\d)-(\d\d)-(\d\d)", h)
+        # Ngay phai lay o COT HAN KIEM, khong phai ngay dau tien tren dong.
+        # Mot hang that thuong co ngay o cot khac — "tu dau ra", "do ngay nao" —
+        # va lay nham cai do thi cong bao QUA HAN cho mot gia dinh con han.
+        # Cot han kiem la cot ap chot, tinh tu phai sang: trang thai la cot cuoi.
+        ngay = None
+        if len(o) >= 2:
+            ngay = re.search(r"(20\d\d)-(\d\d)-(\d\d)", o[-2])
+        if ngay is None and len(o) == 1:
+            ngay = re.search(r"(20\d\d)-(\d\d)-(\d\d)", h)
         if ngay and "HET-HAN" not in h.upper() and "EXPIRED" not in h.upper():
             try:
                 han = time.mktime(time.strptime(ngay.group(0), "%Y-%m-%d"))
@@ -245,7 +253,7 @@ def cong_gia_dinh(goc):
 
 
 cong_gia_dinh.mo_ta = "So gia dinh co han kiem"
-cong_gia_dinh.chung_minh = "moi gia dinh ghi ra deu co trang thai, va khong cai nao qua han ma van chua kiem"
+cong_gia_dinh.chung_minh = "moi gia dinh ghi ra deu co trang thai, va khong cai nao qua han ma van chua kiem (han doc o COT AP CHOT, khong phai ngay dau tien tren dong)"
 cong_gia_dinh.khong_chung_minh = "gia dinh QUAN TRONG NHAT da duoc viet ra. Cai nguy hiem nhat thuong la cai khong ai nghi la gia dinh."
 def _pha_gia_dinh(goc):
     """Gieo mot hang gia dinh KHONG CO TRANG THAI.
