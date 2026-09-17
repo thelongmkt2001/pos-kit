@@ -13,7 +13,10 @@ Ban tieu chuan goc liet ke 25 artifact "gan nhu du an nao cung phai co". Cham
 tren du an that da chay 20 ngay, 180 commit va da phat hanh: 12 co, 13 KHONG
 BAO GIO duoc tao, du an van chay.
 
-Nen bo nay tao 17 file, va them 7 file neu ban goi --day-du. Them artifact khi
+Nen bo nay tao 17 file, va them 7 file neu ban goi --day-du.
+
+Da co san mot kho dang chay? Dung --kho: no chi tao NHUNG FILE MA CAC CONG
+NHIN KHO doi, va khong dung toi file nao ban da co. Them artifact khi
 co mot CAU HOI THAT chua co cho tra loi — dung tao truoc roi tim viec cho no.
 
 Co hai thu CO Y KHONG co file rieng: nhat ky thay doi va so bang chung. Ca hai
@@ -40,7 +43,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.18.1"
+PHIEN_BAN = "1.19.2"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -356,6 +359,21 @@ Viet ba dong nhat ky truoc khi dong may. Dong dat nhat la dong CHUA CHAC.
 - Khong tu doi huong du an; de nghi thi duoc, tu doi thi khong.
 - Khong chep quy uoc sang file khac. File nay la ban chinh; cho khac tro toi
   no. Hai ban sao thi mot ban se cu di ma khong ai biet ban nao cu.
+"""
+
+AGENTS_TRO = """# Quy uoc: doc `CLAUDE.md`
+
+Quy uoc lam viec cua du an nay nam o `CLAUDE.md`. Doc file do truoc khi lam.
+
+---
+
+Vi sao co file nay du noi dung nam cho khac: cac cong cu AI khong doc cung mot
+ten file. Co cong cu tu doc `CLAUDE.md`, co cong cu tu doc `AGENTS.md`. Thieu
+ten nao thi voi cong cu do, quy uoc cua ban la MOT THU VO HINH — va no im lang
+y het luc quy uoc co ma khong co tac dung.
+
+Nen: hai TEN, mot BAN NOI DUNG. Day la cai TEN; ban noi dung o `CLAUDE.md`.
+Chep noi dung sang day nua thi thanh hai nguon su that, va `cong.py` se bao do.
 """
 
 CLAUDE = """# Quy uoc: doc `AGENTS.md`
@@ -1051,6 +1069,20 @@ def _cho_chay(p):
         pass
 
 
+def da_co(goc, *duong):
+    """Kho nay da co thu do o BAT KY duong dan nao trong danh sach chua.
+
+    viet() chi nhin dung mot duong. Cac cong thi tim theo nhieu duong — cong
+    "file trang thai" chap nhan ca STATE.md lan docs/STATE.md. Hai ben khong
+    nhin cung mot cho thi --kho se tao mot ban thu hai ben canh ban da co, va
+    hai file trang thai la dung kieu hong ca bo cong nay sinh ra de chan.
+
+    Do duoc 2026-09-17: chay --kho tren chinh kho goc tao them STATE.md va
+    cong.py o goc, trong khi chung da nam o docs/ va kit/.
+    """
+    return any(os.path.exists(os.path.join(goc, d)) for d in duong)
+
+
 def viet(goc, ten, noi_dung):
     p = os.path.join(goc, ten)
     if os.path.exists(p):
@@ -1069,13 +1101,77 @@ def main():
         return 2
     goc = os.path.abspath(dung[0])
     day_du = "--day-du" in sys.argv
+    chi_kho = "--kho" in sys.argv
     ten = os.path.basename(goc.rstrip(os.sep)) or "du-an"
     han = (datetime.date.today() + datetime.timedelta(days=14)).isoformat()
 
     os.makedirs(goc, exist_ok=True)
     print()
-    print("  Khoi tao: %s" % goc)
+    print("  Khoi tao: %s%s" % (goc, "   (--kho: chi cac file cong NHIN KHO doi)"
+                                if chi_kho else ""))
     print()
+
+    if chi_kho:
+        # Dung nhung file ma nam cong `nhin_kho` cua cong.py doi, khong hon.
+        # Hai cong con lai trong nam cai do — lenh trong tai lieu, va bi mat —
+        # khong can file nao ca.
+        da_tao = 0
+        if da_co(goc, "STATE.md", "docs/STATE.md", "TRANG-THAI.md",
+                 "CURRENT.md"):
+            print("  bo qua (da co)  file trang thai")
+        else:
+            da_tao += viet(goc, "STATE.md", STATE.format(ngay=HOM_NAY))
+        # Hai ten, mot ban noi dung. Chon ban chinh theo cai kho DA CO, khong
+        # theo mac dinh cua kit: tha mot AGENTS.md day vao mot kho da co
+        # CLAUDE.md day thi cong "quy uoc" van do, chi la do vi mot ly do khac
+        # — hai nguon su that. Do duoc 2026-09-17 tren mot kho that.
+        co_claude = os.path.exists(os.path.join(goc, "CLAUDE.md"))
+        co_agents = os.path.exists(os.path.join(goc, "AGENTS.md"))
+        if co_claude and not co_agents:
+            da_tao += viet(goc, "AGENTS.md", AGENTS_TRO)
+        elif co_agents and not co_claude:
+            da_tao += viet(goc, "CLAUDE.md", CLAUDE)
+        elif not co_agents and not co_claude:
+            da_tao += viet(goc, "AGENTS.md", AGENTS)
+            da_tao += viet(goc, "CLAUDE.md", CLAUDE)
+        else:
+            print("  bo qua (da co)  AGENTS.md va CLAUDE.md")
+        if da_co(goc, "CHO-DUA.md", "docs/CHO-DUA.md"):
+            print("  bo qua (da co)  CHO-DUA.md")
+        else:
+            da_tao += viet(goc, "CHO-DUA.md", CONG_CU)
+        if da_co(goc, "phu-thuoc-ngoai.txt", "docs/phu-thuoc-ngoai.txt"):
+            print("  bo qua (da co)  phu-thuoc-ngoai.txt")
+        else:
+            da_tao += viet(goc, "phu-thuoc-ngoai.txt", PHU_THUOC)
+        nguon = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "cong.py")
+        dich = os.path.join(goc, "cong.py")
+        if da_co(goc, "cong.py", os.path.join("kit", "cong.py")):
+            print("  bo qua (da co)  cong.py")
+        elif os.path.exists(nguon):
+            io.open(dich, "w", encoding="utf-8", newline="").write(
+                io.open(nguon, encoding="utf-8").read())
+            print("  tao             cong.py")
+            da_tao += 1
+        print()
+        print("  " + "-" * 62)
+        print("  Xong. %d file. File nao ban da co thi KHONG bi dung toi." % da_tao)
+        print()
+        print("  Moi file o tren tra loi dung mot cong:")
+        print("    STATE.md              -> File trang thai con song")
+        print("    AGENTS.md + CLAUDE.md -> Quy uoc toi duoc ca hai loai cong cu")
+        print("    CHO-DUA.md            -> Cho dua duoc ghi ra")
+        print("    phu-thuoc-ngoai.txt   -> cho khai URL, ten mien, ban sao")
+        print()
+        print("  Roi chay:   python cong.py --kho")
+        print()
+        print("  Day KHONG phai nhan ca bo kit. 18 cong con lai canh nhung ho so")
+        print("  bo kit sinh ra, va chung im lang cho toi khi ban co chung.")
+        print("  " + "-" * 62)
+        print()
+        return 0
+
 
     # Dem THAT, khong ghi cung. Ban dau file nay in ra mot con so ghi cung
     # va no sai ngay lan chay dau — dung cai ho loi ma chinh bo cong nay bat.

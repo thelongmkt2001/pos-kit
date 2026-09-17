@@ -43,6 +43,32 @@ và im lặng ở đó **không phải là đạt**, nó là *"không có gì đ
 
 Chạy `--kho` trước. Thấy nó chỉ đúng chỗ thì mới tính tới việc dựng hồ sơ.
 
+### Rồi nhận **từng phần**, không phải cả bộ
+
+```bash
+python khoi-tao.py . --kho
+```
+
+Nó tạo **đúng những file mà năm cổng trên đòi**, không hơn:
+
+| File | Trả lời cổng nào |
+|---|---|
+| `STATE.md` | File trạng thái còn sống |
+| `AGENTS.md` + `CLAUDE.md` | Quy ước tới được cả hai loại công cụ |
+| `CHO-DUA.md` · `phu-thuoc-ngoai.txt` | Chỗ dựa được ghi ra |
+
+**Nó không đụng tới file bạn đã có** — và nó tìm ở đúng những chỗ các cổng tìm, nên một kho để
+`STATE.md` trong `docs/` sẽ không bị tạo thêm bản thứ hai ở gốc.
+
+Hai tên quy ước được chọn theo **cái kho bạn đang có**: kho đã có `CLAUDE.md` thì `AGENTS.md` được
+tạo là một bản **trỏ tới** nó, không phải một bản dày thứ hai. Thả thêm một bản dày vào đó thì cổng
+vẫn đỏ — chỉ là đỏ vì *hai nguồn sự thật* thay vì vì *thiếu một tên*.
+
+> 📌 Đo trên một kho thật ngày **2026-09-17** (`welcome-to-marketing-giao-trinh`, 283 file, chưa bao
+> giờ nghe tên bộ kit): **3 trên 5 cổng đỏ trước, 1 sau**, và `CLAUDE.md` của kho **không đổi một
+> byte**. Cổng còn đỏ là đúng: kit tạo ra **chỗ** để khai 22 chỗ dựa ngoài, còn khai thì vẫn là việc
+> của người.
+
 `--tiep` là câu trả lời cho một chữ **"tiếp"**: nó đọc dãy giai đoạn, mục *việc tiếp theo* của file
 trạng thái và toàn bộ cổng chạy không cần mạng, rồi in ra đang ở đâu · sắp làm gì · cái gì đang
 chặn. Nó **thoát 1 chứ không đoán** — hai giai đoạn cùng đang làm, hoặc không chỗ nào ghi việc sắp
