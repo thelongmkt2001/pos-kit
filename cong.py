@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.20.2"
+PHIEN_BAN = "1.21.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -1988,6 +1988,21 @@ def _bo_xuong_dong(t):
     return t.replace("\r\n", "\n").replace("\r", "\n").rstrip("\n")
 
 
+def _token_gh():
+    """Token cua `gh` neu co, de khong dung han muc khach la.
+
+    KHONG ghi ra file, KHONG in ra. Chi dung trong bo nho cho mot loi goi.
+    Khong co gh, hoac gh chua dang nhap, thi tra ve None va moi thu chay nhu cu.
+    """
+    try:
+        p = subprocess.run(["gh", "auth", "token"], stdout=subprocess.PIPE,
+                           stderr=subprocess.DEVNULL, timeout=15)
+        t = p.stdout.decode("utf-8", "replace").strip()
+        return t if p.returncode == 0 and t else None
+    except Exception:
+        return None
+
+
 def cong_ban_sao(goc):
     """File trong kho co con khop voi ban DA CONG BO khong. Can mang.
 
@@ -2016,6 +2031,9 @@ def cong_ban_sao(goc):
         return 0, ra
 
     import urllib.request
+    # Han muc API cho khach la la 60 goi mot gio, va mot phien lam viec binh
+    # thuong dung het no — gap that 2026-09-17. Token cua `gh` nang len 5000.
+    dau = _token_gh()
     hong = 0
     for duong, url in cap:
         p = os.path.join(goc, duong)
@@ -2037,12 +2055,29 @@ def cong_ban_sao(goc):
                 # "*/*" de may chu khong phai GitHub van phuc vu binh thuong.
                 "Accept": "application/vnd.github.raw, */*",
             })
+            if dau and "api.github.com" in url:
+                yc.add_header("Authorization", "Bearer " + dau)
             xa = urllib.request.urlopen(yc, timeout=20).read().decode(
                 "utf-8", "replace")
         except Exception as e:
+            vi = type(e).__name__
+            them = None
+            # Het han muc API doc len y het mot loi mang, nhung hai thu do doi
+            # hai viec khac han: mot cai phai sua ngay, mot cai chi phai cho.
+            # Do duoc 2026-09-17: X-RateLimit-Remaining = 0, API tra 403.
+            if getattr(e, "code", None) == 403 and getattr(e, "headers", None):
+                if e.headers.get("X-RateLimit-Remaining") == "0":
+                    lai = e.headers.get("X-RateLimit-Reset")
+                    khi = ""
+                    if lai and lai.isdigit():
+                        khi = time.strftime(" (het han luc %H:%M)",
+                                            time.localtime(int(lai)))
+                    vi = "HET HAN MUC API" + khi
+                    them = ("Day KHONG phai lech. La chua doc duoc. Cho han muc"
+                            " moi, hoac dung mot token.")
             ra.append(("HONG", "%-28s khong tai duoc ban cong bo: %s"
-                       % (duong, type(e).__name__)))
-            ra.append(("   ", "Khong tai duoc KHONG PHAI la 'van khop'."))
+                       % (duong, vi)))
+            ra.append(("   ", them or "Khong tai duoc KHONG PHAI la 'van khop'."))
             hong += 1
             continue
         if _bo_xuong_dong(doc(p)) == _bo_xuong_dong(xa):

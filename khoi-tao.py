@@ -43,7 +43,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.20.2"
+PHIEN_BAN = "1.21.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
