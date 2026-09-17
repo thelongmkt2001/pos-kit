@@ -24,7 +24,7 @@ Chép **một file** `cong.py` vào kho của bạn rồi chạy:
 python cong.py --kho
 ```
 
-`--kho` chỉ chạy **5 cổng nhìn kho như nó đang là** — chúng không cần bạn tạo file nào trước:
+`--kho` chỉ chạy **6 cổng nhìn kho như nó đang là** — chúng không cần bạn tạo file nào trước:
 
 | Cổng | Nó hỏi gì |
 |---|---|
@@ -33,11 +33,12 @@ python cong.py --kho
 | **Bí mật không nằm trong repo** | Có hình dạng khoá/token nào nằm trong file đang theo dõi không? |
 | **Chỗ dựa được ghi ra** | Kho này gọi ra ngoài những đâu, và có ai ghi lại không? |
 | **Quy ước tới được cả hai loại công cụ** | `AGENTS.md` và `CLAUDE.md` — thiếu một cái thì một nửa số công cụ **không thấy gì và cũng không báo lỗi** |
+| **Chỗ đang đo là nơi làm việc thật** | Bạn đang đo **kho**, hay một **bản chép** của nó? Trên một bản clone nông, mọi câu hỏi về quá khứ chỉ trả lời về đoạn đã tải về — và đọc lên y hệt như khi chúng nói về cả dự án |
 
-**17 cổng còn lại canh hồ sơ do chính bộ kit sinh ra.** Trên một kho chưa nhận kit, chúng im lặng —
+**18 cổng còn lại canh hồ sơ do chính bộ kit sinh ra.** Trên một kho chưa nhận kit, chúng im lặng —
 và im lặng ở đó **không phải là đạt**, nó là *"không có gì để xem"*.
 
-> 📌 Con số 5/17 không phải ý kiến. Đo ngày **2026-09-17** trên hai kho thật, không phải kho sinh ra
+> 📌 Con số 6/18 không phải ý kiến. Đo ngày **2026-09-17** trên hai kho thật, không phải kho sinh ra
 > bộ kit — một kho 1.800 file, một kho 283 file. Kết quả giống hệt nhau: **13 trên 18** cổng thật sự
 > chạy là im lặng. Ba cổng kêu đúng ở cả hai kho; ba cổng kêu nhầm, đã sửa.
 

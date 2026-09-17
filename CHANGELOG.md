@@ -8,6 +8,58 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.10.0] tới [1.24.3] — 2026-09-16 · 2026-09-17
+
+> ⚠️ **Mười lăm bản đã phát hành mà không có mục nào ở đây.** File này chỉ tồn tại trong kho công
+> bố, không nằm trong kho nguồn, và **không được khai vào danh sách công bố** — nên lệnh phát hành
+> không bao giờ chạm tới nó và cổng đối chiếu bản công bố không nhìn tới nó. Một file không ai khai
+> thì không phép kiểm nào nhìn, và nó mục âm thầm: đó đúng là kiểu hỏng mà bộ kit này sinh ra để
+> chặn, xảy ra với chính nó. Phát hiện 2026-09-17. Từ bản này, file nằm ở `kit/CHANGELOG.md` trong
+> kho nguồn và **được khai vào danh sách công bố**.
+>
+> Phần dưới gộp theo nhóm thay vì bịa ra mười lăm mục sau khi sự việc đã qua. Ngày và số phiên bản
+> lấy từ lịch sử git, không lấy từ trí nhớ.
+
+### Thêm — cổng mới
+
+- **`--tiep`** (1.11.0): một chữ *"tiếp"* giải ra một việc có tên, hoặc **thoát 1** thay vì đoán.
+- **`--ha-tang`** (1.12.0): chạy thật các lệnh hạ tầng đã khai, thay vì tin là máy có đủ công cụ.
+- **`--kho`** (1.16.0): chỉ chạy nhóm cổng **nhìn kho như nó đang là** — dùng được trên kho chưa
+  bao giờ nghe tên bộ kit.
+- **Cổng `khi-hong`** (1.17.0): sổ rủi ro đầy đủ vẫn thiếu trang *hỏng rồi thì làm gì*.
+- **Cổng `viec-tiep` · `lap-lai` · `no-cu`** (1.13.0–1.14.0): việc kế tiếp phải là một dòng máy đọc
+  được; việc làm lại nhiều lần phải được gói; một dòng nợ phải tự khai nó đã cũ.
+- **Cổng `ban-sao`** (1.8.0) và **`ten-mien`**: bản trong kho phải khớp bản đã công bố; tên miền
+  phải còn hạn.
+- **Cổng thứ 24 — *chỗ đang đo là nơi làm việc thật*** (1.24.0): trên một bản clone nông, mọi câu
+  hỏi về quá khứ chỉ trả lời về đoạn đã tải về.
+
+### Sửa
+
+- **Hạn mức API** (1.21.0): cổng đối chiếu bản công bố đỏ vì hết hạn mức khách lạ (60 gọi/giờ), và
+  chỉ in `HTTPError`. Nay gọi tên đúng trường hợp kèm giờ hết hạn, và dùng token của `gh` nếu có.
+- **Quét chỗ dựa bị cắt ở 400 file** (1.23.0): trên một kho 1.834 file nó báo *11 chỗ dựa* trong
+  khi chính phương pháp đó, bỏ trần đi, thấy **118**. Nay quét hết, **luôn in phạm vi đã quét**,
+  tách *mã gọi ra ngoài* khỏi *địa chỉ chỉ được ghi lại*, và bỏ qua tên miền không gian XML.
+- **Phép thăm dò dùng `HEAD`** (1.23.0): báo chết ba dịch vụ đang sống. Nay dùng `GET`, User-Agent
+  thật, và gọi tên mã lỗi HTTP.
+- **Cổng 24 kêu nhầm trên dự án mới** (1.24.1): coi *"nằm trong thư mục tạm"* là bằng chứng của bản
+  sao. Đã bỏ dấu vết đó. Cùng lúc lộ ra **phép phá của nó chưa bao giờ chạy** — nó chỉ ghi
+  `.git/shallow` vào một thư mục không phải kho git, nên cổng vẫn *"đạt"* vì một lý do sai.
+- **`--tu-kiem` thoát 1 trên dự án vừa dựng** (1.24.1) dù không có gì sai: tách *"dự án này chưa có
+  thứ cổng ấy canh"* ra khỏi *"cổng mù"*.
+- **Mẫu vẫn chở nghiệp vụ của kho nguồn** (1.24.3): hàng ví dụ trong `CHO-DUA.md` và `RUI-RO.md`
+  nói về *"bài lab"* và *"nửa phần thực hành"*, cùng hai con trỏ `M14`, `M7` vào một giáo trình
+  không đi kèm kit.
+
+### Đổi
+
+- **Im lặng thôi đọc như đạt** (1.19.2, 1.20.2): dòng tổng kết tách *"đã nhìn và đạt"* khỏi *"không
+  có gì để xem"* — trên một dự án mới, **10 trên 19** cổng chạy offline in `ok` trong khi thực ra
+  chúng đang nói *"chưa có gì"*.
+- **Lệnh phát hành một bước** (1.10.1): sáu bước tay thành một lệnh, kèm bước **đọc ngược về từ bên
+  ngoài** để xác nhận — bước hay bị bỏ nhất, đúng lúc nó là bước duy nhất chứng minh được gì.
+
 ## [1.9.2] — 2026-09-17
 
 Bản 1.9.1 **không sửa được** thứ nó nói là đã sửa. Đây mới là bản sửa thật.
