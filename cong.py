@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.24.4"
+PHIEN_BAN = "1.24.5"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2154,6 +2154,26 @@ def cong_ban_sao(goc):
         ra.append(("  ", "khac. Khai bao trong %s, moi dong:" % TEP_PHU_THUOC))
         ra.append(("  ", "  ban-sao kit/cong.py<hai dau cach><URL ban cong bo>"))
         return 0, ra
+
+    # PHAM VI, IN MOI LAN. Cong nay chi kiem thu DA KHAI BAO. Neu kho co mot
+    # thu muc xuat ban thi con so "da khai / co that" la thu duy nhat cho nguoi
+    # doc biet mot dong xanh o day phu duoc bao nhieu. Do tai cho, khong goi
+    # mang. Do ngay 2026-09-17: 1 khai tren 88 file da xuat ban, va lay mau bon
+    # trang thi mot da lech.
+    xuat_ban = 0
+    for thu in ("site/dist", "site/dist-teacher", "dist", "public", "build"):
+        d = os.path.join(goc, thu)
+        if os.path.isdir(d):
+            xuat_ban += sum(1 for x in os.listdir(d) if x.lower().endswith(".html"))
+    if xuat_ban:
+        da_khai = sum(1 for x, _ in cap if x.lower().endswith(".html"))
+        ra.append(("--", "Trang da xuat ban: %d co that, %d duoc khai va kiem"
+                   % (xuat_ban, da_khai)))
+        if da_khai < xuat_ban:
+            ra.append(("  ", "%d trang con lai KHONG duoc cong nao doi chieu."
+                       % (xuat_ban - da_khai)))
+            ra.append(("  ", "Mot dong xanh o duoi noi ve nhung cai DA KHAI,"))
+            ra.append(("  ", "khong noi ve thu muc xuat ban."))
 
     import urllib.request
     # Han muc API cho khach la la 60 goi mot gio, va mot phien lam viec binh
