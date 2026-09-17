@@ -45,7 +45,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.13.0"
+PHIEN_BAN = "1.14.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2296,6 +2296,108 @@ def _pha_ha_tang(goc):
 cong_ha_tang.pha = _pha_ha_tang
 
 
+# Cac tieu de duoc coi la "so no" cua file trang thai.
+TIEU_DE_NO = ("known debt", "so no", "no da biet", "da biet nhung chua sua",
+              "no")
+# Moi dong no song phai mang: soi <ngay>  va  lai <ngay>
+MAU_SOI = re.compile(r"\bsoi\s+(\d{4}-\d{2}-\d{2})")
+MAU_LAI = re.compile(r"\blai\s+(\d{4}-\d{2}-\d{2})")
+
+
+def cong_no_cu(goc):
+    """Dong no nao qua han soi lai, hoac chua bao gio khai la soi luc nao.
+
+    Mot dong no la mot loi khai ve HIEN TAI, viet o thi qua khu. Khong co gi
+    buoc ai doc lai no, nen no gia di ma van doc len nhu hien trang — va nguoi
+    doc di sua mot thu da duoc sua roi.
+
+    Cong nay chi biet DA BAO LAU KHONG AI SOI. No khong biet mon do con that
+    hay khong; may khong doc duoc y nghia, va mot cong hua dieu do se duoc
+    thoa man bang mot cau nghe cho xuoi.
+    """
+    ra = []
+    f = tim_tep(goc, "STATE.md", "docs/STATE.md", "TRANG-THAI.md")
+    if not f:
+        ra.append(("--", "Khong co file trang thai — bo qua cong nay"))
+        return 0, ra
+
+    than = _muc_theo_tieu_de(doc(f), TIEU_DE_NO)
+    if than is None:
+        ra.append(("--", "File trang thai khong co muc so no — bo qua"))
+        ra.append(("  ", "Them mot muc '## Da biet nhung chua sua'. Khong co no"))
+        ra.append(("  ", "thi mon no nam trong dau nguoi, va dau nguoi thi im."))
+        return 0, ra
+
+    hom_nay = time.strftime("%Y-%m-%d")
+    song, thieu, qua = 0, [], []
+    for d in than.splitlines():
+        d = d.strip()
+        if not d.startswith("- "):
+            continue
+        noi = d[2:].strip()
+        if noi.startswith("~~") or noi.startswith("<"):
+            continue                      # da dong, hoac con la cho trong
+        song += 1
+        kd = khong_dau(noi)
+        m_soi, m_lai = MAU_SOI.search(kd), MAU_LAI.search(kd)
+        ten = noi[:44] + ("..." if len(noi) > 44 else "")
+        if not m_soi or not m_lai:
+            thieu.append(ten)
+        elif m_lai.group(1) < hom_nay:
+            qua.append((ten, m_lai.group(1)))
+
+    if not song:
+        ra.append(("--", "So no khong con mon nao dang mo — chua co gi de kiem"))
+        return 0, ra
+
+    if thieu or qua:
+        ra.append(("HONG", "%d/%d mon no khong con noi duoc no con dung hay khong"
+                   % (len(thieu) + len(qua), song)))
+        for t in thieu[:4]:
+            ra.append(("   ", "   thieu moc:  %s" % t))
+        for t, h in qua[:4]:
+            ra.append(("   ", "   qua han %s:  %s" % (h, t)))
+        ra.append(("   ", "Ba lan lien tiep ngay 2026-09-17, mot dong no doc len"))
+        ra.append(("   ", "nhu hien trang trong khi mon do da xong tu truoc."))
+        ra.append(("   ", "Moi dong con mo phai mang: soi <ngay>  va  lai <ngay>"))
+        return 1, ra
+
+    ra.append(("ok", "%s: %d mon no dang mo, deu con trong han soi lai"
+               % (ngan(goc, f), song)))
+    return 0, ra
+
+
+cong_no_cu.mo_ta = "So no khong tu gia di trong im lang"
+cong_no_cu.chung_minh = "moi mon no DANG MO co ghi soi lan cuoi va han soi lai, va chua qua han"
+cong_no_cu.khong_chung_minh = "mon no do CON THAT hay da duoc sua tu luc nao. May khong doc duoc y nghia — no chi dem ngay. Va no chi thay nhung mon BAN DA GHI RA."
+
+
+def _pha_no_cu(goc):
+    """Gieo mot dong no co han soi lai da qua."""
+    for ten in ("STATE.md", os.path.join("docs", "STATE.md")):
+        duong = os.path.join(goc, ten)
+        if not os.path.exists(duong):
+            continue
+        t = doc(duong)
+        than = _muc_theo_tieu_de(t, TIEU_DE_NO)
+        if than is None:
+            continue
+        dong = None
+        for d in than.splitlines():
+            if d.strip().startswith("- "):
+                dong = d
+                break
+        moi = "- Mon gieo vao de thu cong (soi 2020-01-01, lai 2020-06-01)"
+        if dong is None:
+            continue
+        io.open(duong, "w", encoding="utf-8", newline="").write(
+            t.replace(dong, dong + NL + moi, 1))
+        return
+
+
+cong_no_cu.pha = _pha_no_cu
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -2314,6 +2416,7 @@ CAC_CONG = [
     cong_giai_doan,
     cong_viec_tiep,
     cong_lap_lai,
+    cong_no_cu,
     cong_ngan_sach,
     cong_phu_thuoc,
     cong_ten_mien,

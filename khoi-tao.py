@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.13.0"
+PHIEN_BAN = "1.14.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -160,6 +160,22 @@ o dau ca" — do cung la mot cau tra loi.>
 
 <Mon no. Cai gi dang sai ma minh CHAP NHAN tam. Viet ra day thi no la no; khong
 viet ra thi no la mot cai bay co hen gio.>
+
+Moi mon CON MO viet thanh mot dong `- `, va mang theo hai moc:
+
+- <mot mon no chua sua *(soi 2026-01-15, lai 2026-04-15)* — bo dau < > di khi
+  ban viet mon that>
+
+Mon da dong thi gach di: `- ~~Mon cu~~ **Dong 2026-04-02** ...` — cong bo qua
+cac dong gach.
+
+> Vi sao hai moc do: mot dong no la **loi khai ve hien tai viet o thi qua khu**.
+> Khong co gi buoc ai doc lai no, nen no gia di trong im lang va nguoi doc tuong
+> minh dang doc hien trang. Do duoc tren du an goc ngay 2026-09-17: BA phien
+> lien tiep, BA tren BA dong no hoa ra da cu truoc khi co ai dung toi.
+>
+> Gian han ra theo tinh chat, dung dat cung mot ngay — bay dong cung do mot hom
+> thi cong keu mot tran roi bi tat, va luc do no bao ve KHONG cai nao.
 
 ## Chua chac
 
