@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.9.2"
+PHIEN_BAN = "1.10.1"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -1246,8 +1246,27 @@ def _muc_truong(t):
     return ra
 
 
+# Nhung chu dien vao cho co, khong tra loi gi. So sanh NGUYEN O chu khong phai
+# tien to: "chua" khong phai cau tra loi, nhung "chua can, vi X" thi la — no co
+# ly do di kem. Lay tien to thi cai thu hai bi bao nham, va mot cong keu nham
+# se bi tat di.
+KHONG_PHAI_TRA_LOI = (
+    "chua", "chua lam", "chua co", "chua ro", "chua biet", "se lam",
+    "se lam sau", "sau", "todo", "tbd", "khong biet", "n/a", "na", "-",
+    "?", "...", "x",
+)
+
+
 def _da_tra_loi(v):
-    return bool(v) and not v.startswith("<")
+    """O co duoc dien mot cau tra loi that khong.
+
+    Ba kieu khong phai tra loi: bo trong, con nguyen placeholder <...>, va
+    dien mot chu giu cho nhu "chua". Kieu thu ba la kieu duy nhat doc len
+    giong nhu da lam xong.
+    """
+    if not v or v.startswith("<"):
+        return False
+    return khong_dau(v).strip().strip(".!,;:") not in KHONG_PHAI_TRA_LOI
 
 
 def cong_da_tra(goc):
@@ -1968,6 +1987,186 @@ def _pha_ban_sao(goc):
 cong_ban_sao.pha = _pha_ban_sao
 
 
+# Cac tieu de duoc coi la "phan nhin ve phia truoc" cua file trang thai.
+TIEU_DE_VIEC_TIEP = ("viec tiep theo", "next", "viec ke tiep")
+
+
+def _muc_theo_tieu_de(t, ten_chuan):
+    """Tra ve than cua muc "## ..." dau tien co tieu de khop, hoac None."""
+    ra, dang, ten = [], False, None
+    for d in t.splitlines():
+        if d.startswith("## "):
+            if dang:
+                break
+            ten = khong_dau(d[3:]).strip()
+            dang = any(ten.startswith(x) for x in ten_chuan)
+            continue
+        if dang:
+            ra.append(d)
+    return NL.join(ra).strip() if dang or ra else None
+
+
+def cong_viec_tiep(goc):
+    """Muc "viec tiep theo" co con noi ve giai doan dang lam khong.
+
+    Moi muc khac trong file trang thai deu ke chuyen DA XAY RA, nen khi chung
+    cu di thi con doc ra duoc. Muc nay ke chuyen SAP LAM — no cu di ma van doc
+    len nhu mot ke hoach, va do la kieu hong khong ai phat hien bang mat.
+    """
+    ra = []
+    fs = tim_tep(goc, "STATE.md", "docs/STATE.md", "TRANG-THAI.md")
+    fg = tim_tep(goc, "GIAI-DOAN.md", "docs/GIAI-DOAN.md")
+    if not fs or not fg:
+        ra.append(("--", "Thieu file trang thai hoac day giai doan — bo qua"))
+        return 0, ra
+
+    dang_lam = [k for k, v in _muc_truong(doc(fg))
+                if not k.startswith("<") and v
+                and khop_ten(v.get("trang thai", ""), TRANG_THAI_GIAI_DOAN)
+                == "dang lam"]
+    if len(dang_lam) != 1:
+        ra.append(("--", "Khong co dung mot giai doan dang lam — cong 'day giai"))
+        ra.append(("  ", "doan' lo phan do; cong nay khong co gi de doi chieu."))
+        return 0, ra
+
+    than = _muc_theo_tieu_de(doc(fs), TIEU_DE_VIEC_TIEP)
+    if than is None:
+        ra.append(("--", "File trang thai khong co muc 'viec tiep theo'"))
+        ra.append(("  ", "Them mot muc '## Viec tiep theo'. Khong co no thi"))
+        ra.append(("  ", "khong cho nao ke ra viec sap lam."))
+        return 0, ra
+    if not than or than.startswith("<"):
+        ra.append(("--", "Muc 'viec tiep theo' con trong — chua co gi de kiem"))
+        return 0, ra
+
+    ten = dang_lam[0]
+    if khong_dau(than).find(khong_dau(ten).strip()) < 0:
+        ra.append(("HONG", "'Viec tiep theo' khong nhac giai doan dang lam"))
+        ra.append(("   ", "   dang lam: %s" % ten[:56]))
+        ra.append(("   ", "Moi muc khac trong file trang thai ke chuyen DA xay"))
+        ra.append(("   ", "ra, nen cu di thi doc ra duoc. Muc nay ke chuyen SAP"))
+        ra.append(("   ", "LAM — no cu di ma van doc len nhu mot ke hoach."))
+        return 1, ra
+
+    ra.append(("ok", "'Viec tiep theo' dang noi ve: %s" % ten[:52]))
+    return 0, ra
+
+
+cong_viec_tiep.mo_ta = "Viec tiep theo con dung giai doan"
+cong_viec_tiep.chung_minh = "muc 'viec tiep theo' trong file trang thai co goi ten giai doan dang lam"
+cong_viec_tiep.khong_chung_minh = "nhung viec ke trong do DANG lam, hay du, hay xep dung thu tu. No doi chieu hai file, khong doc duoc y dinh."
+
+
+def _pha_viec_tiep(goc):
+    """Doi muc 'viec tiep theo' sang mot noi dung khong lien quan giai doan."""
+    for ten in ("STATE.md", os.path.join("docs", "STATE.md")):
+        duong = os.path.join(goc, ten)
+        if not os.path.exists(duong):
+            continue
+        t = doc(duong)
+        ra, dang = [], False
+        for d in t.splitlines():
+            if d.startswith("## "):
+                if dang:
+                    dang = False
+                elif any(khong_dau(d[3:]).strip().startswith(x)
+                         for x in TIEU_DE_VIEC_TIEP):
+                    ra.append(d)
+                    ra.append("")
+                    ra.append("Mot viec khong lien quan gi toi giai doan dang lam.")
+                    ra.append("")
+                    dang = True
+                    continue
+            if dang:
+                continue
+            ra.append(d)
+        io.open(duong, "w", encoding="utf-8", newline="").write(NL.join(ra) + NL)
+        return
+
+
+cong_viec_tiep.pha = _pha_viec_tiep
+
+
+# So lan tro len thi doi phai goi lai. Luat nay da nam san trong mau AGENTS.md
+# ("nhung thu ban da phai nhac lai TU BA LAN TRO LEN"); o day no thanh mot con
+# so may doc duoc.
+NGUONG_LAP_LAI = 3
+
+
+def cong_lap_lai(goc):
+    """Viec da lam tu ba lan tro len ma chua duoc goi lai thanh cai gi.
+
+    Duoi ba lan thi ban chua biet phan nao that su lap; goi som thi goi nham.
+    Tu ba lan tro len thi cai gia cua viec KHONG goi bat dau lon hon.
+
+    Vi sao phai co cho ghi: khong ai nho minh da lam mot viec may lan. Lan thu
+    sau van thay nhu lan thu nhat — hoi lau mot chut, nhung khong du kho de
+    dung lai ma nghi.
+    """
+    ra = []
+    f = tim_tep(goc, "LAP-LAI.md", "docs/LAP-LAI.md")
+    if not f:
+        ra.append(("--", "Khong co so viec lap lai — bo qua cong nay"))
+        ra.append(("  ", "Can no lan thu hai ban lam lai mot viec. Tao san:"))
+        ra.append(("  ", "  python kit/khoi-tao.py ."))
+        return 0, ra
+
+    muc = [(k, v) for k, v in _muc_truong(doc(f))
+           if not k.startswith("<") and v]
+    if not muc:
+        ra.append(("--", "So viec lap lai chua co muc nao — chua co gi de kiem"))
+        ra.append(("  ", "Do KHONG phai 'khong co viec nao lap'. Cong nay doc"))
+        ra.append(("  ", "file, no khong nhin duoc ban dang lam gi."))
+        return 0, ra
+
+    hong, tong = [], 0
+    for ten, tr in muc:
+        m = re.search(r"(\d+)", tr.get("da lam", ""))
+        if not m:
+            continue
+        lan = int(m.group(1))
+        tong += 1
+        if lan < NGUONG_LAP_LAI:
+            continue
+        if not _da_tra_loi(tr.get("goi thanh", "")):
+            hong.append((ten if len(ten) <= 46 else ten[:43] + "...", lan))
+
+    if hong:
+        ra.append(("HONG", "%d viec da lam tu %d lan tro len ma chua goi lai"
+                   % (len(hong), NGUONG_LAP_LAI)))
+        for ten, lan in hong[:6]:
+            ra.append(("   ", "   %-46s %d lan" % (ten, lan)))
+        ra.append(("   ", "Lam mot viec ba lan bang tay thi lan thu tu cung se"))
+        ra.append(("   ", "bang tay, va lan nao cung co the sai mot kieu khac."))
+        return 1, ra
+
+    ra.append(("ok", "%s: %d viec co ghi so lan, khong cai nao qua nguong ma"
+               " chua goi lai" % (ngan(goc, f), tong)))
+    return 0, ra
+
+
+cong_lap_lai.mo_ta = "Viec lap lai da duoc goi lai"
+cong_lap_lai.chung_minh = "moi viec ghi tu %d lan tro len deu co dong GOI THANH" % NGUONG_LAP_LAI
+cong_lap_lai.khong_chung_minh = "ban da ghi DU nhung viec dang lap. Mot viec lam nam lan ma khong ai ghi vao day thi cong nay khong thay — va do dung la truong hop hay xay ra nhat."
+
+
+def _pha_lap_lai(goc):
+    """Gieo mot viec da lam nhieu lan ma chua goi lai."""
+    muc = (NL + "## Chep tay ba file sang mot kho khac" + NL + NL
+           + "DA LAM:    6 lan" + NL
+           + "MOI LAN:   ba lenh cp, roi mot lan commit" + NL)
+    for ten in ("LAP-LAI.md", os.path.join("docs", "LAP-LAI.md")):
+        duong = os.path.join(goc, ten)
+        if os.path.exists(duong):
+            io.open(duong, "a", encoding="utf-8", newline="").write(muc)
+            return
+    io.open(os.path.join(goc, "LAP-LAI.md"), "w", encoding="utf-8",
+            newline="").write("# Viec lap lai" + NL + muc)
+
+
+cong_lap_lai.pha = _pha_lap_lai
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -1984,6 +2183,8 @@ CAC_CONG = [
     cong_da_tra,
     cong_ket_noi,
     cong_giai_doan,
+    cong_viec_tiep,
+    cong_lap_lai,
     cong_ngan_sach,
     cong_phu_thuoc,
     cong_ten_mien,

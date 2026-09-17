@@ -100,6 +100,8 @@ phép thử viết sai**, không phải cổng hỏng. Cách giải thích dễ 
 | **Sổ "đã tra" ngăn được lần tra lại** | Một mục **đã chọn** mà không ghi đã loại gì; chọn thứ bên ngoài mà không ghi giấy phép; giấy phép *không rõ* mà không có hạn xem lại, hoặc hạn đã qua | Bạn đã tra **đủ**, hay tra **đúng**, hay giấy phép ghi trong đó là thật |
 | **Quy ước tới được cả hai loại công cụ** | Chỉ có một trong hai tên `AGENTS.md` / `CLAUDE.md`; hoặc **cả hai đều mang nội dung** — hai nguồn sự thật | Công cụ **có đọc** file đó thật không, hay có làm theo không |
 | **Nhật ký còn được ghi** | Nhật ký trỏ tới hồ sơ đã mất; hoặc kho chạy tiếp **10 commit** mà không ai ghi thêm dòng nào | Mục nhật ký đó đúng, hay có ích |
+| **Việc tiếp theo còn đúng giai đoạn** | Mục *việc tiếp theo* của `STATE.md` **không còn gọi tên** giai đoạn đang làm — phần nhìn về phía trước đã chết mà vẫn đọc lên như một kế hoạch | Những việc kể trong đó **đang** làm, hay đủ, hay xếp đúng thứ tự |
+| **Việc lặp lại đã được gọi lại** | Một việc ghi **từ 3 lần trở lên** trong `LAP-LAI.md` mà ô *gọi thành* còn bỏ trống, hoặc chỉ ghi *"chưa"* | Bạn đã ghi **đủ** những việc đang lặp — việc làm năm lần mà không ai ghi vào đó thì nó không thấy |
 | **Bản trong kho khớp bản đã công bố** *(`--ngoai`)* | File đã khai báo **lệch** với bản đang nằm ở URL tương ứng; hoặc không tải được bản đó | Bạn đã khai báo **đủ** file được công bố |
 | **Tên miền còn hạn** *(`--ngoai`)* | Tên miền đã khai báo còn **≤ 60 ngày** là hết hạn; hoặc **không tra được hạn** | Thẻ thanh toán gia hạn còn sống. Nó đọc sổ đăng ký, không đọc ví bạn |
 | **Phụ thuộc ngoài còn sống** *(`--ngoai`)* | URL đã khai báo mà chết | Nội dung sau URL còn đúng |
@@ -119,12 +121,13 @@ Bộ mặc định:
 | `AGENTS.md` | Làm việc ở đây theo quy ước gì? **Bản chính.** | Khi quy ước đổi |
 | `CLAUDE.md` | *(một dòng trỏ tới `AGENTS.md` — hai tên, một bản nội dung)* | — |
 | `QUYET-DINH/README.md` + `0001-mau.md` | Đã chốt gì, vì sao? | Khi quyết một chuyện khó lùi |
-| `viec/MAU-VIEC.md` | Việc đang làm là gì, đi tới đâu? | Mỗi việc một tờ |
+| `viec/MAU-VIEC.md` | **Lời giao đã sắc chưa**, việc đang làm là gì, đi tới đâu? | Mỗi việc một tờ |
 | `NHAT-KY.md` | Đã thử gì rồi, hỏng ra sao, **vì sao đổi hướng**? | Mỗi phiên một mục |
 | `DA-TRA.md` | Đã tra gì rồi, chọn gì, **loại gì và vì sao**? | Mỗi lần tra một mục |
 | `KET-NOI.md` | Công cụ **với tay ra được tới đâu**, và tắt bằng cách nào? | Khi cắm thêm hoặc gỡ một chỗ nối |
 | `GIAI-DOAN.md` | Có những giai đoạn nào, mỗi cái **cố ý hoãn lại** gì? | Khi sang giai đoạn khác |
 | `NGAN-SACH.md` | Cái gì đọc **mỗi phiên**, và nó được phép to đến đâu? | Hiếm — mỗi lần đổi phải viết lý do |
+| `LAP-LAI.md` | Việc nào đã làm **ba lần** mà vẫn đang làm tay? | Khi bắt gặp mình làm lại một việc |
 | `boi-canh/` | *(nguyên liệu thô: bản phân tích dài, đoạn chat, kết quả đo)* | — |
 | `README.md` | Người mới bắt đầu từ đâu? | Hiếm |
 | `kit/cong.py` | *(bản sao của bộ cổng, để dự án chạy độc lập)* | — |

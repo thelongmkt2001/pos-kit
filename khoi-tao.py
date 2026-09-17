@@ -13,7 +13,7 @@ Ban tieu chuan goc liet ke 25 artifact "gan nhu du an nao cung phai co". Cham
 tren du an that da chay 20 ngay, 180 commit va da phat hanh: 12 co, 13 KHONG
 BAO GIO duoc tao, du an van chay.
 
-Nen bo nay tao 16 file, va them 6 file neu ban goi --day-du. Them artifact khi
+Nen bo nay tao 17 file, va them 6 file neu ban goi --day-du. Them artifact khi
 co mot CAU HOI THAT chua co cho tra loi — dung tao truoc roi tim viec cho no.
 
 Co hai thu CO Y KHONG co file rieng: nhat ky thay doi va so bang chung. Ca hai
@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.8.0"
+PHIEN_BAN = "1.10.1"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -218,6 +218,18 @@ no nhin thi khong hong.
 Ai lam thi KHONG tu nhan viec cua minh la xong. Lam ra bang chung, nguoi khac
 doc bang chung roi moi noi xong. Khong co nguoi khac thi doc lai vao hom sau,
 va phai doc BANG CHUNG chu khong doc lai loi ke.
+
+## Loi giao toi tay ban, truoc khi ban lam gi voi no
+
+Loi giao la thu DAU TIEN co the sai, va no sai truoc moi thu khac. Mot loi giao
+mo ma van lam duoc thi ca buoi di theo huong khong ai dinh.
+
+O so 0 cua `viec/MAU-VIEC.md` la cho lam viec do: chep nguyen van loi giao, do
+no bang nam cau, roi VIET LAI mot doan bang chu cua minh va gui lai truoc khi
+bat dau. Cho lech nhau lo ra o do, luc no con re.
+
+Khong cong nao kiem duoc buoc nay. Cai dong vai tro cong la loi xac nhan cua
+nguoi giao.
 
 ## Viec KHONG giao duoc — dung lai va hoi
 
@@ -501,6 +513,34 @@ export PYTHONIOENCODING=utf-8
 $PY kit/cong.py
 """
 
+LAP_LAI = """# Viec lap lai
+
+> Viec lam MOT lan thi lam. Lam BA lan thi goi no lai — thanh mot lenh, mot
+> script, mot dong quy uoc, hay mot muc trong `AGENTS.md`.
+
+Luat ba lan khong phai con so dep. Duoi ba lan thi ban chua biet phan nao that
+su lap va phan nao chi giong nhau; goi som thi goi nham. Tu ba lan tro len thi
+cai gia cua viec KHONG goi bat dau lon hon cai gia cua viec goi.
+
+Vi sao can mot cho ghi: khong ai nho minh da lam mot viec may lan. Lan thu sau
+van thay nhu lan thu nhat — hoi lau mot chut, nhung khong du kho de dung lai
+ma nghi.
+
+Kiem:  python kit/cong.py
+
+---
+
+## <viec gi — mo ta bang dong tu, khong phai ten cong cu>
+
+DA LAM:    <so lan> lan
+MOI LAN:   <ton bao lau, hoac may buoc>
+GOI THANH: <script nao / lenh nao / dong quy uoc nao — hoac "chua", va cong se
+            doi khi so lan tu ba tro len>
+
+<!-- Chep khoi tren xuong duoi day cho moi viec. Muc cu cong them so lan, dung
+     tao muc moi cho cung mot viec. -->
+"""
+
 NGAN_SACH = """# Ngan sach ngu canh
 
 > Cai dat nhat khong phai file dai nhat. La file duoc doc LAI MOI PHIEN.
@@ -729,6 +769,42 @@ VIEC = """# <ten viec, mot cau>
 > Dien TRUOC khi go chu dau tien. To giay nay di het mot viec tu dau den cuoi.
 > Viec xong thi o 5 di vao STATE / QUYET-DINH, con to nay thanh ho so.
 
+## 0. Loi giao — da sac chua
+
+<Chep NGUYEN VAN loi giao vua nhan vao day, khong sua chu nao. Chep nguyen van
+de lat sau con doi chieu duoc: mot loi giao duoc nho lai bao gio cung sac hon
+loi giao that.>
+
+```
+<loi giao nguyen van>
+```
+
+Nam cau do. Cau nao loi giao da tra loi thi ghi "co"; cau nao chua thi ghi
+ban se LAM GI voi no — hoi lai, hay tu gia dinh roi viet gia dinh ra.
+
+| Cau hoi | Loi giao co tra loi khong |
+|---|---|
+| **Dung kho nay khong?** Loi giao dang noi ve cai dang mo truoc mat, hay ve mot du an khac? | |
+| **Dich hay duong?** No dang ta KET QUA phai dung, hay dang chi cach lam? Neu chi cach lam ma cach do va voi code that — noi ra truoc, dung lam theo roi bao. | |
+| **Xong la the nao?** Ai nhin vao dau de noi la dat? (Khong phai ban. Ban khong tu tuyen bo viec cua minh la da nghiem thu.) | |
+| **Cai gi KHONG duoc doi?** Ho so da chot, du lieu dang chay, quyet dinh da co. | |
+| **Cho nao hoi lai, cho nao tu quyet?** Mot chon lua lui lai duoc thi tu quyet. Cai doi huong san pham, doi kien truc, tieu tien, hay kho lui — hoi. | |
+
+**Viet lai loi giao, mot doan, bang chu cua ban** — roi GUI LAI cho nguoi giao
+truoc khi tieu mot buoi. Cho lech nhau se lo ra o day, luc no con re.
+
+```
+<loi giao viet lai>
+```
+
+GIA DINH DA GHI: <nhung cho ban khong hoi ma tu chon. Khong ghi ra thi lat sau
+                  khong ai phan biet duoc "da thong nhat" voi "toi doan the">
+
+<!-- Khong cong nao kiem duoc o nay. Viec lam sac dien ra TRUOC khi co file nao
+     ton tai, va mot o bat buoc phai day se duoc day bang thu nghe cho xuoi.
+     Cai dong vai tro cong o day la loi XAC NHAN cua nguoi giao, khong phai
+     mot script. -->
+
 ## 1. Muc tieu — cai gi phai DUNG khi xong
 
 <Khong phai "lam cai gi". La "cai gi thanh that".
@@ -811,6 +887,7 @@ Du an nay dung bo cong cua Project Operating System.
 6. `KET-NOI.md` — cong cu voi tay ra duoc toi dau, va tat bang cach nao
 7. `GIAI-DOAN.md` — co nhung giai doan nao, moi cai hoan lai cai gi
 8. `NGAN-SACH.md` — cai gi doc moi phien, va no duoc phep to den dau
+9. `LAP-LAI.md` — viec nao da lam ba lan ma chua duoc goi lai
 
 ## Truoc khi dong may
 
@@ -889,6 +966,7 @@ def main():
     da_tao += viet(goc, "KET-NOI.md", KET_NOI)
     da_tao += viet(goc, "GIAI-DOAN.md", GIAI_DOAN)
     da_tao += viet(goc, "NGAN-SACH.md", NGAN_SACH)
+    da_tao += viet(goc, "LAP-LAI.md", LAP_LAI)
     da_tao += viet(goc, "hooks/pre-push", HOOK)
     _cho_chay(os.path.join(goc, "hooks", "pre-push"))
     da_tao += viet(goc, "boi-canh/README.md", BOI_CANH)
