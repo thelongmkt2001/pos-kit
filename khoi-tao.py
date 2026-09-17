@@ -43,7 +43,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.24.1"
+PHIEN_BAN = "1.24.3"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -535,14 +535,14 @@ Cot **Co bao** la cot lam viec cua ca bang. Mot rui ro khong co co bao thi khong
 phai rui ro duoc quan — no la mot noi lo. Va mot danh sach toan noi lo thi sau
 hai tuan khong ai mo ra nua, vi mo ra cung khong lam duoc gi.
 
-Co bao chinh la phep do cua M7, chia ve phia truoc: *neu chuyen nay bat dau xay
-ra, toi se thay gi khac di?*
+Co bao la phep do do chia ve phia truoc: *neu chuyen nay bat dau xay ra, toi se
+thay gi khac di?*
 
 Trang thai: `DANG MO` · `DA XAY RA` · `HET RUI RO`
 
 | Rui ro | Hong co nao | Lam gi truoc | Co bao | Trang thai | Khi hong |
 |---|---|---|---|---|---|
-| <vi du: kho fixture bi doi ten hoac chuyen rieng tu> | <nua phan thuc hanh chet> | <khai bao vao phu-thuoc-ngoai.txt> | <phep kiem goi URL do moi lan chay> | DANG MO | <ten muc trong KHI-HONG.md, hoac 'khong can, vi ...'> |
+| <vi du: nha cung cap X doi gia hoac ngung dich vu> | <phan nao cua du an dung lai> | <lam gi de giam kha nang do xay ra> | <nhin vao dau de biet no dang xay ra> | DANG MO | <ten muc trong KHI-HONG.md, hoac 'khong can, vi ...'> |
 
 ⚠️ `python kit/cong.py` bao hong neu mot rui ro DANG MO ma o Co bao de trong,
 hoac chi ghi mot y dinh ("de y xem", "theo doi").
@@ -572,7 +572,7 @@ DUOC. Ke ca file do cong cu tu sinh ra ma ban khong tao.>
 
 ## Chung gap nhau o cho nao
 
-<Cho phan nay goi phan kia. Day la cho doi thi ben kia vo — M14 Phan 5b.>
+<Cho phan nay goi phan kia. Day la cho doi mot ben thi ben kia vo.>
 
 ## Ra ngoai o cho nao
 
@@ -857,7 +857,7 @@ TRONG NHA VAN XANH HET.
 
 | Cho dua | Dung de lam gi | No chet thi mat gi | Ai giu / het han khi nao |
 |---|---|---|---|
-| <vi du: github.com/<ai do>/<kho>> | <moi bai lab clone tu day> | <nua phan thuc hanh> | <tai khoan ca nhan> |
+| <vi du: github.com/ten-ban/ten-kho> | <du an dung no de lam gi> | <thieu no thi mat phan nao> | <ai giu, het han khi nao> |
 
 ## Cho hay bi bo sot
 
