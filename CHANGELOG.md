@@ -8,6 +8,27 @@ Theo lối [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), đánh số
 > đó. Công bố thì đổi người đọc: ai chép `cong.py` vào dự án của họ sẽ **không bao giờ nhìn thấy**
 > lịch sử commit ở đây. Với họ, lời commit không phải một cái nhà, nó là một chỗ không tới được.
 
+## [1.9.2] — 2026-09-17
+
+Bản 1.9.1 **không sửa được** thứ nó nói là đã sửa. Đây mới là bản sửa thật.
+
+### Sửa
+
+- **Header `Cache-Control: no-cache` một mình không đủ** — CDN của GitHub vẫn trả bản cũ, đo được
+  ngay sau khi đẩy 1.9.1 lên. Cổng vẫn báo đỏ giả.
+
+  Nay nó gửi thêm `Accept: application/vnd.github.raw, */*`. Với GitHub, header đó chuyển sang
+  **đường API** — tươi ngay lập tức, không qua CDN, và trả nội dung thô thay vì JSON. Phần `*/*`
+  để máy chủ không phải GitHub vẫn phục vụ bình thường.
+
+  Khai báo nên trỏ vào **đường API** chứ không phải `raw.githubusercontent.com`:
+
+  ```
+  ban-sao kit/cong.py  https://api.github.com/repos/<ban>/<kho>/contents/cong.py
+  ```
+
+  📌 Đo được cả hai bên: cùng một lúc, `raw` trả `1.8.1` còn API trả `1.9.1`. Không cần token.
+
 ## [1.9.1] — 2026-09-17
 
 Sửa một lỗi **của chính cổng 18**, bắt được ngay ở lần chạy thứ hai của nó.

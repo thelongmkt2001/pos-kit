@@ -43,7 +43,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.9.1"
+PHIEN_BAN = "1.9.2"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -1916,6 +1916,11 @@ def cong_ban_sao(goc):
                 "User-Agent": "kit-cong",
                 "Cache-Control": "no-cache",
                 "Pragma": "no-cache",
+                # Do duoc: header no-cache mot minh KHONG du — CDN cua GitHub
+                # van tra ban cu. Duong qua API thi tuoi ngay lap tuc, va
+                # header nay bao no tra ve NOI DUNG THO thay vi JSON.
+                # "*/*" de may chu khong phai GitHub van phuc vu binh thuong.
+                "Accept": "application/vnd.github.raw, */*",
             })
             xa = urllib.request.urlopen(yc, timeout=20).read().decode(
                 "utf-8", "replace")
