@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.16.0"
+PHIEN_BAN = "1.17.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2463,6 +2463,97 @@ def _pha_no_cu(goc):
 cong_no_cu.pha = _pha_no_cu
 
 
+# O "da dien tap" ghi NGAY da thu that, hoac "chua". Dem theo ngay.
+MAU_NGAY = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def cong_khi_hong(goc):
+    """Hong roi thi lam gi — co viet ra khong, va co phai mot BUOC khong.
+
+    `RUI-RO.md` tra loi "cai gi co the hong". Cong nay hoi cau dung sau do. Mot
+    so rui ro day du ma khong co trang tra loi thi doc len van yen tam, va do la
+    kieu yen tam dat nhat.
+
+    Dung lai CO_BAO_RONG cua cong rui ro: "de y", "theo doi", "xem xet" la y
+    dinh chu khong phai mot buoc — du no dung o o co bao hay o o lui ve.
+    """
+    ra = []
+    f = tim_tep(goc, "KHI-HONG.md", "docs/KHI-HONG.md")
+    if not f:
+        ra.append(("--", "Khong co trang 'khi hong thi lam gi' — bo qua cong nay"))
+        ra.append(("  ", "Can no khi du an co thu hong that thi dau. So rui ro"))
+        ra.append(("  ", "noi cai gi co the hong; cho nay noi luc do lam gi."))
+        return 0, ra
+
+    muc = [(k, v) for k, v in _muc_truong(doc(f))
+           if not k.startswith("<") and v]
+    if not muc:
+        ra.append(("--", "Trang 'khi hong' chua co muc nao — chua co gi de kiem"))
+        ra.append(("  ", "Do KHONG phai 'khong co gi hong duoc'."))
+        return 0, ra
+
+    DOI = (("dau hieu", "nhin vao dau thi biet"),
+           ("cat mau", "viec dau tien de no thoi hong them"),
+           ("lui ve", "lui ve dau, bang cach nao"),
+           ("xong khi", "nhin vao dau de biet da ve binh thuong"))
+    hong, dien_tap = [], 0
+    for ten, tr in muc:
+        ng = ten if len(ten) <= 40 else ten[:37] + "..."
+        for kh, _y in DOI:
+            v = tr.get(kh, "")
+            if not _da_tra_loi(v):
+                hong.append((ng, kh, "bo trong"))
+                continue
+            gon = khong_dau(v).strip().strip("<>").strip("*` ").strip()
+            if any(x in gon for x in CO_BAO_RONG):
+                hong.append((ng, kh, "moi la mot y dinh"))
+        # Dem theo NGAY, khong theo "o co chu". _da_tra_loi() nhan moi chu
+        # khong phai cho giu cho, nen "chua — nhung ..." duoc dem la DA dien
+        # tap. Do duoc 2026-09-17: cong in 3/4 trong khi so dung la 2/4.
+        if MAU_NGAY.search(tr.get("da dien tap", "")):
+            dien_tap += 1
+
+    if hong:
+        ra.append(("HONG", "%d o chua tra loi duoc, tren %d thu da ghi"
+                   % (len(hong), len(muc))))
+        for ng, kh, vi in hong[:6]:
+            ra.append(("   ", "   %-40s %s: %s" % (ng, kh.upper(), vi)))
+        ra.append(("   ", "Mot quy trinh lui viet bang 'xem xet' thi luc cham"))
+        ra.append(("   ", "vao khong ai biet phai go gi."))
+        return 1, ra
+
+    ra.append(("ok", "%s: %d thu da ghi, bon o deu tra loi duoc"
+               % (ngan(goc, f), len(muc))))
+    ra.append(("  ", "   da dien tap that: %d/%d (dem theo NGAY ghi trong o) —"
+               " con so nay KHONG lam cong do" % (dien_tap, len(muc))))
+    return 0, ra
+
+
+cong_khi_hong.mo_ta = "Hong roi thi biet lam gi"
+cong_khi_hong.chung_minh = "moi thu da ghi deu co dau hieu, buoc cat mau, cho lui ve va dieu kien xong — va khong o nao chi la mot y dinh"
+cong_khi_hong.khong_chung_minh = "quy trinh do CHAY DUOC. May doc duoc chu, khong biet lenh lui kia con dung hay khong — o DA DIEN TAP duoc dem va in ra chinh vi the, va no KHONG lam cong do. Va no chi thay nhung thu BAN DA GHI."
+
+
+def _pha_khi_hong(goc):
+    """Gieo mot thu co the hong ma o lui ve chi la mot y dinh."""
+    muc = (NL + "## Thu gieo vao de thu cong" + NL + NL
+           + "DAU HIEU:     trang bao loi 500" + NL
+           + "CAT MAU:      tat dich vu" + NL
+           + "LUI VE:       theo doi roi tinh sau" + NL
+           + "XONG KHI:     trang tra ve 200" + NL
+           + "DA DIEN TAP:  chua" + NL)
+    for ten in ("KHI-HONG.md", os.path.join("docs", "KHI-HONG.md")):
+        duong = os.path.join(goc, ten)
+        if os.path.exists(duong):
+            io.open(duong, "a", encoding="utf-8", newline="").write(muc)
+            return
+    io.open(os.path.join(goc, "KHI-HONG.md"), "w", encoding="utf-8",
+            newline="").write("# Khi hong thi lam gi" + NL + muc)
+
+
+cong_khi_hong.pha = _pha_khi_hong
+
+
 # ==================================================================== danh sach
 CAC_CONG = [
     cong_trang_thai,
@@ -2472,6 +2563,7 @@ CAC_CONG = [
     cong_vong_doi,
     cong_trang_thai_ten,
     cong_rui_ro,
+    cong_khi_hong,
     cong_cho_dua,
     cong_ban_do,
     cong_nhat_ky,

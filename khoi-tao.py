@@ -13,7 +13,7 @@ Ban tieu chuan goc liet ke 25 artifact "gan nhu du an nao cung phai co". Cham
 tren du an that da chay 20 ngay, 180 commit va da phat hanh: 12 co, 13 KHONG
 BAO GIO duoc tao, du an van chay.
 
-Nen bo nay tao 17 file, va them 6 file neu ban goi --day-du. Them artifact khi
+Nen bo nay tao 17 file, va them 7 file neu ban goi --day-du. Them artifact khi
 co mot CAU HOI THAT chua co cho tra loi — dung tao truoc roi tim viec cho no.
 
 Co hai thu CO Y KHONG co file rieng: nhat ky thay doi va so bang chung. Ca hai
@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.16.0"
+PHIEN_BAN = "1.17.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -464,6 +464,48 @@ va lam cho khac muc di. Mot su co mat nua ngay ma nguyen nhan chi la mot dong.
 
 📌 Neu ban ghi duoc ba dong vao bang nay, ban se thay chung khong phai ba loi
 khac nhau. Chung la mot co che, xay ra ba lan.
+"""
+
+KHI_HONG = """# Khi hong thi lam gi
+
+> `RUI-RO.md` tra loi: **cai gi co the hong, va dau hieu nao bao no dang hong.**
+> File nay tra loi cau dung sau do: **keu roi thi lam gi.**
+
+Mot so rui ro day du ma khong co file nay thi doc len van yen tam. Do la kieu
+yen tam dat nhat: ban biet cai gi se hong, va khong ai biet luc do lam gi.
+
+Chi viet vao day nhung thu **hong that thi dau**. Mot muc cho moi thu do, va
+moi muc phai tra loi duoc bon cau — neu khong tra loi duoc thi do moi la thu
+dang biet.
+
+Kiem:  python kit/cong.py
+
+---
+
+## <chuyen gi hong — mot cau, bang tieng cua nguoi dung chu khong phai cua may>
+
+DAU HIEU:     <nhin vao DAU thi biet no dang hong. Mot cho cu the: mot trang,
+               mot lenh, mot con so. "De y" hay "theo doi" khong phai dau hieu>
+CAT MAU:      <viec DAU TIEN de no thoi hong them. Chua chac la sua — thuong la
+               tat mot thu gi do>
+LUI VE:       <lui ve dau, bang lenh hay buoc nao. Neu khong lui duoc thi ghi
+               ro la khong lui duoc — do cung la mot cau tra loi>
+XONG KHI:     <nhin vao dau de biet da ve binh thuong. Khong phai "moi thu on">
+DA DIEN TAP:  <chua / NGAY da thu that, dang 2026-01-15. Cong dem theo NGAY,
+               nen mot o viet dai ma khong co ngay van la chua>
+
+<!-- Chep khoi tren xuong duoi day cho moi thu. -->
+
+---
+
+📌 **Vi sao co o DA DIEN TAP, va vi sao no khong lam cong do.**
+
+Mot quy trinh lui chua bao gio chay thu la **mot loi hua ve cach kiem, chua bao
+gio duoc kiem**. Cong nay dem va in ra con so do, nhung khong bat no do: bat do
+thi hoac sinh ra dien tap gia, hoac cong bi tat — va luc do no bao ve khong cai
+nao.
+
+Con so do la de ban nhin, khong phai de may phan xu.
 """
 
 RUI_RO = """# So rui ro
@@ -1060,6 +1102,7 @@ def main():
         da_tao += viet(goc, "GIA-DINH.md", GIA_DINH.format(han=han))
         da_tao += viet(goc, "SO-SEO.md", SO_SEO.format(ngay=HOM_NAY))
         da_tao += viet(goc, "RUI-RO.md", RUI_RO)
+        da_tao += viet(goc, "KHI-HONG.md", KHI_HONG)
         da_tao += viet(goc, "CHO-DUA.md", CONG_CU)
         da_tao += viet(goc, "BAN-DO.md", BAN_DO)
         da_tao += viet(goc, "phu-thuoc-ngoai.txt", PHU_THUOC)

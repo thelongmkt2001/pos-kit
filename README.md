@@ -127,6 +127,7 @@ phép thử viết sai**, không phải cổng hỏng. Cách giải thích dễ 
 | **Bí mật không nằm trong repo** | Chuỗi khớp các mẫu đã biết | Repo không có bí mật — nó tìm theo **hình dạng** |
 | **Cái đã bỏ thì không ai trỏ tới** | Tài liệu đang dùng trỏ tới file đã đánh dấu bỏ | Mọi thứ đã cũ đều được đánh dấu |
 | **Trạng thái dự án gọi tên được** | `STATE.md` không có trạng thái thuộc danh sách, hoặc thiếu điều kiện thoát | Trạng thái đó **đúng** |
+| **Hỏng rồi thì biết làm gì** | Một thứ đã ghi trong `KHI-HONG.md` mà thiếu **dấu hiệu · bước cắt máu · chỗ lùi về · điều kiện xong**, hoặc một trong các ô đó mới chỉ là một **ý định** (*"theo dõi"*, *"xem xét"*) | Quy trình đó **chạy được**. Ô *đã diễn tập* được đếm theo **ngày** và **in ra**, nhưng không làm cổng đỏ — bắt đỏ thì sinh ra diễn tập giả |
 | **Rủi ro đang mở có cò báo** | Rủi ro còn mở mà ô cò báo trống, hoặc chỉ là một **ý định** | Cò báo đó sẽ kêu |
 | **Chỗ dựa được ghi ra** | Có dấu vết phụ thuộc ngoài mà không danh sách nào ghi | Danh sách đó đủ, hay đúng |
 | **Bản đồ hệ thống còn đúng** | Bản đồ trỏ tới đường dẫn không còn tồn tại | Bản đồ đúng, đủ, hay **có tồn tại** |
@@ -177,6 +178,7 @@ Thêm với `--day-du`:
 | `GIA-DINH.md` | Đang dựa trên điều gì **chưa kiểm**? |
 | `SO-SEO.md` | Dự án này đã tự lừa mình những lần nào? |
 | `RUI-RO.md` | Chuyện gì có thể hỏng, và **dấu hiệu nào báo** nó đang hỏng? |
+| `KHI-HONG.md` | **Kêu rồi thì làm gì** — cắt máu ở đâu, lùi về đâu, xong khi nào? |
 | `CHO-DUA.md` | Thứ gì bên ngoài mà mất là dự án chết? |
 | `BAN-DO.md` | Đổi một chỗ thì **chỗ nào khác động theo**? |
 | `phu-thuoc-ngoai.txt` | *(một nguồn cho cả người lẫn cổng kiểm)* |
