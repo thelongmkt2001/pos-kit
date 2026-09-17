@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.18.0"
+PHIEN_BAN = "1.18.1"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -391,6 +391,15 @@ def _co_ve_that(gia_tri):
         return False
     if ";" in v or ")" in v or v.startswith(" "):
         return False
+    # Mot khoa hau nhu khong bao gio co dau cach. Do 2026-09-17 tren sau kho:
+    # o mot ung dung nhat ky, "secret" la mot TRUONG NGHIEP VU va gia tri la
+    # van xuoi tieng Viet — bon cho, ca bon deu co dau cach. Hai cho dang
+    # thong tin dang nhap that thi khong co cai nao.
+    #
+    # Danh doi: mot passphrase that co dau cach se bi bo qua. Doi lai, mot cong
+    # bat 4/6 nham tren kho that se bi tat, va luc do no bao ve khong cai nao.
+    if " " in v:
+        return False
     t = v.lower()
     if any(x in t for x in CHU_GIU_CHO):
         return False
@@ -465,7 +474,7 @@ def cong_bi_mat(goc):
 cong_bi_mat.nhin_kho = True
 cong_bi_mat.mo_ta = "Bi mat khong nam trong repo"
 cong_bi_mat.chung_minh = "khong co chuoi nao KHOP CAC MAU DA BIET trong file dang theo doi"
-cong_bi_mat.khong_chung_minh = "repo khong co bi mat. No tim theo HINH DANG; mot bi mat dat ten la `cau_hinh_3` thi no khong thay. Va no chi nhin file, khong nhin LICH SU git."
+cong_bi_mat.khong_chung_minh = "repo khong co bi mat. No tim theo HINH DANG; mot bi mat dat ten la `cau_hinh_3` thi no khong thay. Va no chi nhin file, khong nhin LICH SU git. Va tu 2026-09-17 no BO QUA moi gia tri co dau cach — do la cach duy nhat do duoc de phan biet mot khoa voi mot truong nghiep vu ten `secret` chua van xuoi; mot passphrase that co dau cach se lot qua."
 cong_bi_mat.pha = lambda g: _pha_them(
     g, ["README.md", "docs/README.md"], '\n\nAPI_KEY = "sk-abcdefghijklmnopqrstuvwxyz"\n')
 
