@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.19.2"
+PHIEN_BAN = "1.20.2"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2775,8 +2775,15 @@ def tiep():
 
 
 # ======================================================================== chay
-def chay_het(goc, co_mang=False, im=False, co_lenh=False, chi_kho=False):
+def chay_het(goc, co_mang=False, im=False, co_lenh=False, chi_kho=False,
+             dem=None):
+    """Chay cac cong. `dem` la mot dict de nhan lai so lieu, hoac None.
+
+    `dem` tach hai thu ma mat thuong doc len y het nhau: cong DA NHIN THAY mot
+    thu roi bao dat, va cong KHONG CO GI de nhin. Ca hai deu in chu "ok".
+    """
     tong = 0
+    da_nhin = chua_co = 0
     for c in CAC_CONG:
         if chi_kho and not getattr(c, "nhin_kho", False):
             continue
@@ -2792,6 +2799,16 @@ def chay_het(goc, co_mang=False, im=False, co_lenh=False, chi_kho=False):
             continue
         ma, dong = c(goc)
         tong = max(tong, ma)
+        # Cong IM khi trong toan bo dong ra KHONG co dong nao mang nhan "ok".
+        #
+        # Luat dau tien viet la "dong dau mang nhan --", va no dem nham: mot
+        # cong co the in "--" de KHAI MIEN TRU truoc roi moi in ket qua that.
+        # Tren kho goc, "Lenh trong tai lieu chay duoc" bi xep vao nhom im
+        # trong khi no vua soi xong mot dong lenh that. Do duoc 2026-09-17.
+        if ma == 0 and not any(n.strip() == "ok" for n, _ in dong):
+            chua_co += 1
+        else:
+            da_nhin += 1
         if im:
             continue
         print()
@@ -2800,6 +2817,9 @@ def chay_het(goc, co_mang=False, im=False, co_lenh=False, chi_kho=False):
             print("     %-5s %s" % (nhan, noi))
         print("     %-5s chung minh:     %s" % ("", c.chung_minh))
         print("     %-5s KHONG chung minh: %s" % ("", c.khong_chung_minh))
+    if dem is not None:
+        dem["da nhin"] = da_nhin
+        dem["chua co gi"] = chua_co
     return tong
 
 
@@ -2815,7 +2835,8 @@ def main():
     print("  Thu muc: %s" % goc)
     print("  " + "=" * 68)
 
-    ma = chay_het(goc, co_mang, co_lenh=co_lenh, chi_kho=chi_kho)
+    dem = {}
+    ma = chay_het(goc, co_mang, co_lenh=co_lenh, chi_kho=chi_kho, dem=dem)
 
     print()
     print("  " + "-" * 68)
@@ -2823,8 +2844,28 @@ def main():
         print("  CO CONG BAO HONG. Doc phan 'chung minh' cua cong do truoc khi sua.")
     else:
         print("  Moi cong da chay deu khong bao hong.")
-        print("  Day KHONG phai 'du an nay dung'. Moi cong chi nhin dung mot thu,")
-        print("  va tung cong da tu khai no khong nhin thay gi.")
+
+    # Con so nay khong lien quan gi toi chuyen co cong do hay khong, nen no
+    # nam ngoai ca hai nhanh. Lan dau viet no chi nam trong nhanh "khong hong",
+    # va no bien mat dung luc co mot cong do — tuc dung luc nguoi doc dang can
+    # biet trong so cong CON LAI co bao nhieu cai that su da nhin.
+    chua = dem.get("chua co gi", 0)
+    nhin = dem.get("da nhin", 0)
+    if chua:
+        print()
+        print("  Trong so cong vua chay:")
+        print("      %2d cong DA NHIN THAY mot thu" % nhin)
+        print("      %2d cong KHONG CO GI DE NHIN — file chua co, hoac moi la"
+              % chua)
+        print("         cho trong <...> chua ai dien")
+        print()
+        print("  %d cong kia KHONG phai la dat. Chung im lang, va im lang doc"
+              % chua)
+        print("  len y het dat — do la ly do dong nay ton tai.")
+        print("  Moi cong im deu da in mot dong '--' noi no thieu gi.")
+    print()
+    print("  Day KHONG phai 'du an nay dung'. Moi cong chi nhin dung mot thu,")
+    print("  va tung cong da tu khai no khong nhin thay gi.")
     if not chi_kho:
         so_kho = sum(1 for c in CAC_CONG if getattr(c, "nhin_kho", False))
         print()
