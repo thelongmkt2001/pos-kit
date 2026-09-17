@@ -40,7 +40,7 @@ import datetime
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.17.0"
+PHIEN_BAN = "1.18.0"
 
 HOM_NAY = datetime.date.today().isoformat()
 
@@ -522,9 +522,9 @@ ra, toi se thay gi khac di?*
 
 Trang thai: `DANG MO` · `DA XAY RA` · `HET RUI RO`
 
-| Rui ro | Hong co nao | Lam gi truoc | Co bao | Trang thai |
-|---|---|---|---|---|
-| <vi du: kho fixture bi doi ten hoac chuyen rieng tu> | <nua phan thuc hanh chet> | <khai bao vao phu-thuoc-ngoai.txt> | <phep kiem goi URL do moi lan chay> | DANG MO |
+| Rui ro | Hong co nao | Lam gi truoc | Co bao | Trang thai | Khi hong |
+|---|---|---|---|---|---|
+| <vi du: kho fixture bi doi ten hoac chuyen rieng tu> | <nua phan thuc hanh chet> | <khai bao vao phu-thuoc-ngoai.txt> | <phep kiem goi URL do moi lan chay> | DANG MO | <ten muc trong KHI-HONG.md, hoac 'khong can, vi ...'> |
 
 ⚠️ `python kit/cong.py` bao hong neu mot rui ro DANG MO ma o Co bao de trong,
 hoac chi ghi mot y dinh ("de y xem", "theo doi").

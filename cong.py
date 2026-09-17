@@ -47,7 +47,7 @@ import unicodedata
 # Phien ban cua bo kit. Ban da chep file nay vao du an cua ban, nen no
 # khong tu cap nhat — con so nay la cach duy nhat biet ban dang giu ban nao.
 # Thay doi giua cac ban: CHANGELOG.md trong kho pos-kit.
-PHIEN_BAN = "1.17.0"
+PHIEN_BAN = "1.18.0"
 
 GOC = os.getcwd()
 NL = chr(10)
@@ -2522,15 +2522,60 @@ def cong_khi_hong(goc):
         ra.append(("   ", "vao khong ai biet phai go gi."))
         return 1, ra
 
+    # ---- noi voi so rui ro: moi rui ro DANG MO phai co mot cau tra loi
+    ten_muc = [khong_dau(k) for k, _v in muc]
+    thieu, lac = [], []
+    fr = tim_tep(goc, "RUI-RO.md", "docs/RUI-RO.md", "RISKS.md",
+                 "docs/RISKS.md")
+    co_cot = False
+    if fr:
+        dong = [d for d in doc(fr).splitlines() if d.strip().startswith("|")]
+        hang = [d for d in dong
+                if not re.match(r"^\|[\s:|-]+\|$", d.strip())]
+        if hang:
+            co_cot = len([x for x in hang[0].strip().strip("|").split("|")]) >= 6
+        for h in hang[1:] if co_cot else []:
+            o = [x.strip() for x in h.strip().strip("|").split("|")]
+            if len(o) < 6 or not o[0] or o[0].startswith("<"):
+                continue
+            if "DANG MO" not in o[4].upper() and "OPEN" not in o[4].upper():
+                continue
+            tl = o[5].strip().strip("*` ").strip()
+            ng = o[0][:44]
+            if not _da_tra_loi(tl):
+                thieu.append(ng)
+                continue
+            g = khong_dau(tl)
+            if g.startswith("khong can") or g.startswith("khong co"):
+                continue          # da quyet dinh, va da ghi ly do ngay o do
+            if not any(g in x or x in g for x in ten_muc):
+                lac.append((ng, tl[:34]))
+
+    if thieu or lac:
+        ra.append(("HONG", "%d rui ro dang mo chua noi duoc voi mot loi lui"
+                   % (len(thieu) + len(lac))))
+        for ng in thieu[:4]:
+            ra.append(("   ", "   o 'khi hong' de trong:  %s" % ng))
+        for ng, tl in lac[:4]:
+            ra.append(("   ", "   tro toi muc khong co:    %s -> %r" % (ng, tl)))
+        ra.append(("   ", "So rui ro noi CAI GI CO THE HONG. Cot nay doi mot"))
+        ra.append(("   ", "cau tra loi cho cau dung sau do — ke ca cau"))
+        ra.append(("   ", "'khong can, vi ...'. Bo trong thi moi noi chi nam"))
+        ra.append(("   ", "trong dau nguoi doc."))
+        return 1, ra
+
     ra.append(("ok", "%s: %d thu da ghi, bon o deu tra loi duoc"
                % (ngan(goc, f), len(muc))))
+    if fr and not co_cot:
+        ra.append(("  ", "   so rui ro chua co cot 'Khi hong' — chua doi chieu"))
+        ra.append(("  ", "   duoc hai file. Them mot cot thu sau vao cuoi bang."))
     ra.append(("  ", "   da dien tap that: %d/%d (dem theo NGAY ghi trong o) —"
                " con so nay KHONG lam cong do" % (dien_tap, len(muc))))
     return 0, ra
 
 
 cong_khi_hong.mo_ta = "Hong roi thi biet lam gi"
-cong_khi_hong.chung_minh = "moi thu da ghi deu co dau hieu, buoc cat mau, cho lui ve va dieu kien xong — va khong o nao chi la mot y dinh"
+cong_khi_hong.chung_minh = "moi thu da ghi deu co dau hieu, buoc cat mau, cho lui ve va dieu kien xong, khong o nao chi la mot y dinh; VA moi rui ro dang mo trong so rui ro deu tra loi duoc cot 'khi hong' — tro toi mot muc co that, hoac ghi 'khong can, vi ...'"
 cong_khi_hong.khong_chung_minh = "quy trinh do CHAY DUOC. May doc duoc chu, khong biet lenh lui kia con dung hay khong — o DA DIEN TAP duoc dem va in ra chinh vi the, va no KHONG lam cong do. Va no chi thay nhung thu BAN DA GHI."
 
 

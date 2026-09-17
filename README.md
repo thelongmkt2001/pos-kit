@@ -127,7 +127,7 @@ phép thử viết sai**, không phải cổng hỏng. Cách giải thích dễ 
 | **Bí mật không nằm trong repo** | Chuỗi khớp các mẫu đã biết | Repo không có bí mật — nó tìm theo **hình dạng** |
 | **Cái đã bỏ thì không ai trỏ tới** | Tài liệu đang dùng trỏ tới file đã đánh dấu bỏ | Mọi thứ đã cũ đều được đánh dấu |
 | **Trạng thái dự án gọi tên được** | `STATE.md` không có trạng thái thuộc danh sách, hoặc thiếu điều kiện thoát | Trạng thái đó **đúng** |
-| **Hỏng rồi thì biết làm gì** | Một thứ đã ghi trong `KHI-HONG.md` mà thiếu **dấu hiệu · bước cắt máu · chỗ lùi về · điều kiện xong**, hoặc một trong các ô đó mới chỉ là một **ý định** (*"theo dõi"*, *"xem xét"*) | Quy trình đó **chạy được**. Ô *đã diễn tập* được đếm theo **ngày** và **in ra**, nhưng không làm cổng đỏ — bắt đỏ thì sinh ra diễn tập giả |
+| **Hỏng rồi thì biết làm gì** | Một thứ đã ghi trong `KHI-HONG.md` mà thiếu **dấu hiệu · bước cắt máu · chỗ lùi về · điều kiện xong**, hoặc một ô mới chỉ là một **ý định** (*"theo dõi"*, *"xem xét"*); **và** một rủi ro **đang mở** trong `RUI-RO.md` mà cột *Khi hỏng* bỏ trống, hoặc trỏ tới một mục không có | Quy trình đó **chạy được**. Ô *đã diễn tập* đếm theo **ngày** và được **in ra**, nhưng không làm cổng đỏ — bắt đỏ thì sinh ra diễn tập giả. Cột *Khi hỏng* chấp nhận *"không cần, vì …"*: nó đòi một **quyết định**, không đòi một quy trình |
 | **Rủi ro đang mở có cò báo** | Rủi ro còn mở mà ô cò báo trống, hoặc chỉ là một **ý định** | Cò báo đó sẽ kêu |
 | **Chỗ dựa được ghi ra** | Có dấu vết phụ thuộc ngoài mà không danh sách nào ghi | Danh sách đó đủ, hay đúng |
 | **Bản đồ hệ thống còn đúng** | Bản đồ trỏ tới đường dẫn không còn tồn tại | Bản đồ đúng, đủ, hay **có tồn tại** |
